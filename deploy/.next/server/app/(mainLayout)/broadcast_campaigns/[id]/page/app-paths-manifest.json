@@ -1,0 +1,3 @@
+{
+  "/(mainLayout)/broadcast_campaigns/[id]/page": "app/(mainLayout)/broadcast_campaigns/[id]/page.js"
+}

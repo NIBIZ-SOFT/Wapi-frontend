@@ -1,0 +1,3 @@
+{
+  "/api/kanban-funnels/[id]/available-data/route": "app/api/kanban-funnels/[id]/available-data/route.js"
+}

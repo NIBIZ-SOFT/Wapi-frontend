@@ -1,0 +1,3 @@
+{
+  "/api/webhooks/[id]/map-template/route": "app/api/webhooks/[id]/map-template/route.js"
+}

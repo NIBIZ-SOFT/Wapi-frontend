@@ -1,0 +1,3 @@
+{
+  "/api/working-hours/[wabaId]/route": "app/api/working-hours/[wabaId]/route.js"
+}

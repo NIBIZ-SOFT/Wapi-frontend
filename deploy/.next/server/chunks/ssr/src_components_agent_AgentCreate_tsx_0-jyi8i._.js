@@ -1,0 +1,3 @@
+module.exports=[717837,a=>{"use strict";var b=a.i(187924),c=a.i(204229),d=a.i(524853),e=a.i(241069),f=a.i(50944),g=a.i(823292);a.s(["default",0,()=>{let a=(0,f.useRouter)(),[h,{isLoading:i}]=(0,e.useCreateAgentMutation)(),j=async b=>{try{await h(b).unwrap(),g.toast.success("Agent activated successfully"),a.push(d.ROUTES.Agents)}catch(a){g.toast.error(a?.data?.message||"Failed to onboard agent")}};return(0,b.jsx)("div",{className:"sm:p-8 p-6 bg-(--page-body-bg) dark:bg-(--dark-body) transition-all",children:(0,b.jsx)(c.default,{onSave:j,onCancel:()=>a.push(d.ROUTES.Agents),isLoading:i})})}])}];
+
+//# sourceMappingURL=src_components_agent_AgentCreate_tsx_0-jyi8i._.js.map

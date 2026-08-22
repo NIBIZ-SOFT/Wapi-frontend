@@ -1,0 +1,10 @@
+{
+  "pages": {},
+  "app": {
+    "[project]/src/app/(mainLayout)/message_templates/[id]/page": [
+      "static/media/671921b99e4f15ea-s.p.3tkq1nzpnzlvb.woff2"
+    ]
+  },
+  "appUsingSizeAdjust": true,
+  "pagesUsingSizeAdjust": false
+}

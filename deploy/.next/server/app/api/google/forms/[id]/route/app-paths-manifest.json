@@ -1,0 +1,3 @@
+{
+  "/api/google/forms/[id]/route": "app/api/google/forms/[id]/route.js"
+}

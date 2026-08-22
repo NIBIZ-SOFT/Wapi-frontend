@@ -1,0 +1,3 @@
+{
+  "/api/facebook/linked-accounts/sync/route": "app/api/facebook/linked-accounts/sync/route.js"
+}

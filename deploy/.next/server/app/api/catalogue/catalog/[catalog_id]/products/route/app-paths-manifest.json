@@ -1,0 +1,3 @@
+{
+  "/api/catalogue/catalog/[catalog_id]/products/route": "app/api/catalogue/catalog/[catalog_id]/products/route.js"
+}

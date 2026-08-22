@@ -1,0 +1,3 @@
+{
+  "/api/whatsapp/phone-numbers/[phoneNumberId]/set-primary/route": "app/api/whatsapp/phone-numbers/[phoneNumberId]/set-primary/route.js"
+}

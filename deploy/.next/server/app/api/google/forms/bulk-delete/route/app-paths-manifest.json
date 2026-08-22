@@ -1,0 +1,3 @@
+{
+  "/api/google/forms/bulk-delete/route": "app/api/google/forms/bulk-delete/route.js"
+}

@@ -1,0 +1,3 @@
+{
+  "/api/reply-materials/bulk-delete/route": "app/api/reply-materials/bulk-delete/route.js"
+}

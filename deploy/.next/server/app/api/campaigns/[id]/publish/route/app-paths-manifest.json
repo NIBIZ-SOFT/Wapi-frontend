@@ -1,0 +1,3 @@
+{
+  "/api/campaigns/[id]/publish/route": "app/api/campaigns/[id]/publish/route.js"
+}

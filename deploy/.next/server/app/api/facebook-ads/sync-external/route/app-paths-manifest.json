@@ -1,0 +1,3 @@
+{
+  "/api/facebook-ads/sync-external/route": "app/api/facebook-ads/sync-external/route.js"
+}

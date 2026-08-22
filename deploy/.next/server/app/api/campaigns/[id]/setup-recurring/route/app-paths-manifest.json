@@ -1,0 +1,3 @@
+{
+  "/api/campaigns/[id]/setup-recurring/route": "app/api/campaigns/[id]/setup-recurring/route.js"
+}

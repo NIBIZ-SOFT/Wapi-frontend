@@ -1,0 +1,3 @@
+{
+  "/api/whatsapp/calling/remove-agent-bulk/route": "app/api/whatsapp/calling/remove-agent-bulk/route.js"
+}

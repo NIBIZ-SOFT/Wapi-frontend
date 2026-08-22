@@ -1,0 +1,3 @@
+{
+  "/api/facebook-ads/insights/[level]/[id]/route": "app/api/facebook-ads/insights/[level]/[id]/route.js"
+}

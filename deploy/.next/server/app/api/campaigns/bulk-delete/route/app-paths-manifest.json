@@ -1,0 +1,3 @@
+{
+  "/api/campaigns/bulk-delete/route": "app/api/campaigns/bulk-delete/route.js"
+}

@@ -1,0 +1,3 @@
+{
+  "/(mainLayout)/click_whatsapp_ads/campaigns/[accountId]/page": "app/(mainLayout)/click_whatsapp_ads/campaigns/[accountId]/page.js"
+}

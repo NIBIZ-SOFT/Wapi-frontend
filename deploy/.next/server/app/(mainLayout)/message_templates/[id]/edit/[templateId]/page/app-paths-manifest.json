@@ -1,0 +1,3 @@
+{
+  "/(mainLayout)/message_templates/[id]/edit/[templateId]/page": "app/(mainLayout)/message_templates/[id]/edit/[templateId]/page.js"
+}

@@ -1,0 +1,3 @@
+{
+  "/api/webhooks/[id]/merchant-notifications/route": "app/api/webhooks/[id]/merchant-notifications/route.js"
+}

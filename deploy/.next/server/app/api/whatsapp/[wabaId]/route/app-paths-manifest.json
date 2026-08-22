@@ -1,0 +1,3 @@
+{
+  "/api/whatsapp/[wabaId]/route": "app/api/whatsapp/[wabaId]/route.js"
+}

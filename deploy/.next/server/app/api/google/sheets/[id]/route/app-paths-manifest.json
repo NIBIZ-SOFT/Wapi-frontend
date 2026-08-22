@@ -1,0 +1,3 @@
+{
+  "/api/google/sheets/[id]/route": "app/api/google/sheets/[id]/route.js"
+}
