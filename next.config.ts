@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  output: "standalone",
   basePath: process.env.NEXT_PUBLIC_BASE_PATH || undefined,
   async redirects() {
     const basePath = process.env.NEXT_PUBLIC_BASE_PATH;
@@ -30,10 +31,10 @@ const nextConfig: NextConfig = {
   },
   reactStrictMode: false,
   env: {
-    NEXT_PUBLIC_API_URL: "https://api.wajobab.chat/api",
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5500/api",
     NEXT_PUBLIC_API_BASE_URL: (process.env.NEXT_PUBLIC_BASE_PATH || "") + "/api",
-    NEXT_PUBLIC_STORAGE_URL: "https://api.wajobab.chat",
-    NEXT_PUBLIC_ADMIN_URL: "https://admin.wajobab.chat",
+    NEXT_PUBLIC_STORAGE_URL: process.env.NEXT_PUBLIC_STORAGE_URL || "http://127.0.0.1:5500",
+    NEXT_PUBLIC_ADMIN_URL: process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3001",
   },
   images: {
     remotePatterns: [
