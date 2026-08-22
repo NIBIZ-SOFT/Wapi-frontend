@@ -42,6 +42,10 @@ jobs:
       # 4. Build Next.js
       # ---------------------------------------------------------
       - name: Build Next.js
+        env:
+          NEXT_PUBLIC_API_URL: https://api.wajobab.chat/api
+          NEXT_PUBLIC_STORAGE_URL: https://api.wajobab.chat
+          NEXT_PUBLIC_FRONT_URL: https://wajobab.chat
         run: npm run build
 
       # ---------------------------------------------------------
