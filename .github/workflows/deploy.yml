@@ -193,5 +193,5 @@ jobs:
           echo "=========================================="
           echo "Domain:   wajobab.chat"
           echo "Server:   ${{ secrets.SERVER_HOST }}"
-          echo "User:     ${{ secrets.SERVER_USER }}"
+          echo "User:     wajob1360"
           echo "=========================================="
