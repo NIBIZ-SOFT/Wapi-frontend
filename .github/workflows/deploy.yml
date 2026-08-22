@@ -8,96 +8,65 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: wajobab-frontend-production
+  group: wajobab-frontend
   cancel-in-progress: true
 
 jobs:
+
   build:
-    name: Build Frontend
+
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Next.js
+      - name: Build
         run: npm run build
 
-      - name: Prepare deployment package
+      - name: Prepare artifact
         run: |
-          mkdir -p deploy
+          rm -rf deploy
+          mkdir deploy
 
           cp -r .next/standalone/. deploy/
 
           mkdir -p deploy/.next/static
-          cp -r .next/static/. deploy/.next/static/
+
+          cp -r .next/static/. \
+            deploy/.next/static/
 
           if [ -d public ]; then
             cp -r public deploy/public
           fi
 
-      - name: Create release archive
+      - name: Create artifact
         run: |
-          tar -czf frontend.tar.gz -C deploy .
+          tar -czf frontend.tar.gz \
+            -C deploy .
 
-      - name: Upload release
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          source: "frontend.tar.gz"
-          target: "/tmp"
+      - name: Upload artifact
+        run: |
+          scp \
+            -o StrictHostKeyChecking=no \
+            -i <(echo "${{ secrets.SERVER_SSH_KEY }}") \
+            frontend.tar.gz \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/tmp/frontend.tar.gz
 
       - name: Deploy
-        uses: appleboy/ssh-action@v1.2.2
-        env:
-          APP_NAME: wajobab-frontend
-          APP_DIR: /home/wajobab.chat/public_html/frontend
-          PORT: 3101
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          envs: APP_NAME,APP_DIR,PORT
-          script: |
-            set -e
-
-            RELEASE="$(date +%Y%m%d-%H%M%S)"
-
-            mkdir -p "$APP_DIR/releases/$RELEASE"
-
-            tar -xzf /tmp/frontend.tar.gz \
-              -C "$APP_DIR/releases/$RELEASE"
-
-            rm -f /tmp/frontend.tar.gz
-
-            ln -sfn \
-              "$APP_DIR/releases/$RELEASE" \
-              "$APP_DIR/current"
-
-            cd "$APP_DIR/current"
-
-            if pm2 describe "$APP_NAME" >/dev/null 2>&1; then
-              pm2 reload "$APP_NAME" --update-env
-            else
-              PORT="$PORT" \
-              NODE_ENV=production \
-              pm2 start server.js \
-                --name "$APP_NAME"
-            fi
-
-            pm2 save
-
-            echo "Frontend deployed successfully"
+        run: |
+          ssh \
+            -o StrictHostKeyChecking=no \
+            -i <(echo "${{ secrets.SERVER_SSH_KEY }}") \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
+            "sudo /usr/local/bin/wajobab-deploy frontend /tmp/frontend.tar.gz"
