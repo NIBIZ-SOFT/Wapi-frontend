@@ -131,36 +131,50 @@ jobs:
           chmod 644 "$HOME/.ssh/known_hosts"
 
       # ---------------------------------------------------------
-      # 8. Test SSH connection
+      # 8. Install sshpass
+      # ---------------------------------------------------------
+      - name: Install sshpass
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
+      # ---------------------------------------------------------
+      # 9. Test SSH connection
       # ---------------------------------------------------------
       - name: Test SSH connection
         shell: bash
+        env:
+          SSHPASS: ${{ secrets.SERVER_PASSWORD }}
         run: |
           set -e
 
-          ssh \
+          sshpass -e ssh \
             -i "$HOME/.ssh/wajobab" \
             -o IdentitiesOnly=yes \
-            -o BatchMode=yes \
+            -o PreferredAuthentications=publickey,password \
+            -o PasswordAuthentication=yes \
             -o StrictHostKeyChecking=yes \
             '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}' \
             "echo SSH_CONNECTION_OK && whoami"
 
       # ---------------------------------------------------------
-      # 9. Upload production artifact
+      # 10. Upload production artifact
       # ---------------------------------------------------------
       - name: Upload deployment artifact
         shell: bash
+        env:
+          SSHPASS: ${{ secrets.SERVER_PASSWORD }}
         run: |
           set -e
 
           echo "Uploading frontend.tar.gz..."
 
-          scp \
+          sshpass -e scp \
             -O \
             -i "$HOME/.ssh/wajobab" \
             -o IdentitiesOnly=yes \
-            -o BatchMode=yes \
+            -o PreferredAuthentications=publickey,password \
+            -o PasswordAuthentication=yes \
             -o StrictHostKeyChecking=yes \
             frontend.tar.gz \
             '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/tmp/frontend.tar.gz'
@@ -168,23 +182,26 @@ jobs:
           echo "Upload completed."
 
       # ---------------------------------------------------------
-      # 10. Deploy on server
+      # 11. Deploy on server
       # ---------------------------------------------------------
       - name: Deploy application
         shell: bash
+        env:
+          SSHPASS: ${{ secrets.SERVER_PASSWORD }}
         run: |
           set -e
 
-          ssh \
+          sshpass -e ssh \
             -i "$HOME/.ssh/wajobab" \
             -o IdentitiesOnly=yes \
-            -o BatchMode=yes \
+            -o PreferredAuthentications=publickey,password \
+            -o PasswordAuthentication=yes \
             -o StrictHostKeyChecking=yes \
             '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}' \
             "echo '${{ secrets.SERVER_PASSWORD }}' | sudo -S /usr/local/bin/wajobab-deploy frontend /tmp/frontend.tar.gz"
 
       # ---------------------------------------------------------
-      # 11. Deployment finished
+      # 12. Deployment finished
       # ---------------------------------------------------------
       - name: Deployment completed
         run: |
