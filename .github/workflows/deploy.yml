@@ -8,21 +8,19 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: wajobab-frontend
+  group: wajobab-frontend-production
   cancel-in-progress: true
 
 jobs:
-
   build:
-
+    name: Build and Deploy Frontend
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -31,42 +29,56 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
+      - name: Build Next.js
         run: npm run build
 
-      - name: Prepare artifact
+      - name: Prepare deployment
         run: |
           rm -rf deploy
-          mkdir deploy
+          mkdir -p deploy
 
           cp -r .next/standalone/. deploy/
 
           mkdir -p deploy/.next/static
-
-          cp -r .next/static/. \
-            deploy/.next/static/
+          cp -r .next/static/. deploy/.next/static/
 
           if [ -d public ]; then
             cp -r public deploy/public
           fi
 
-      - name: Create artifact
+      - name: Create deployment archive
         run: |
-          tar -czf frontend.tar.gz \
-            -C deploy .
+          tar -czf frontend.tar.gz -C deploy .
 
-      - name: Upload artifact
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+
+          printf '%s\n' '${{ secrets.SERVER_SSH_KEY }}' > ~/.ssh/wajobab
+
+          chmod 600 ~/.ssh/wajobab
+
+          ssh-keyscan -H '${{ secrets.SERVER_HOST }}' >> ~/.ssh/known_hosts
+
+      - name: Test SSH connection
+        run: |
+          ssh \
+            -i ~/.ssh/wajobab \
+            -o BatchMode=yes \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
+            "echo SSH_CONNECTION_OK && whoami"
+
+      - name: Upload deployment
         run: |
           scp \
-            -o StrictHostKeyChecking=no \
-            -i <(echo "${{ secrets.SERVER_SSH_KEY }}") \
+            -i ~/.ssh/wajobab \
             frontend.tar.gz \
             ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/tmp/frontend.tar.gz
 
       - name: Deploy
         run: |
           ssh \
-            -o StrictHostKeyChecking=no \
-            -i <(echo "${{ secrets.SERVER_SSH_KEY }}") \
+            -i ~/.ssh/wajobab \
+            -o BatchMode=yes \
             ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
             "sudo /usr/local/bin/wajobab-deploy frontend /tmp/frontend.tar.gz"
