@@ -1,3 +1,0 @@
-{
-  "/api/facebook/pages/[id]/verify-otp/route": "app/api/facebook/pages/[id]/verify-otp/route.js"
-}

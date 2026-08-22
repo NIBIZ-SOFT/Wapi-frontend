@@ -1,3 +1,0 @@
-{
-  "/api/kanban-funnels/[id]/items/[itemId]/route": "app/api/kanban-funnels/[id]/items/[itemId]/route.js"
-}

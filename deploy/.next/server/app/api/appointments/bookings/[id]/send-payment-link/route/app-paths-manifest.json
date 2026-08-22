@@ -1,3 +1,0 @@
-{
-  "/api/appointments/bookings/[id]/send-payment-link/route": "app/api/appointments/bookings/[id]/send-payment-link/route.js"
-}

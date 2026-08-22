@@ -1,1 +1,0 @@
-(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,997095,t=>{"use strict";var e=t.i(843476),a=t.i(994064),s=t.i(618566);t.s(["default",0,()=>{let t=(0,s.useParams)(),r=(0,s.useSearchParams)(),u=t.taskId,d=r.get("agentId")||"";return(0,e.jsx)(a.default,{agentId:d,taskId:u})}])}]);

@@ -1,3 +1,0 @@
-{
-  "/api/auth/reset-password-via-token/route": "app/api/auth/reset-password-via-token/route.js"
-}

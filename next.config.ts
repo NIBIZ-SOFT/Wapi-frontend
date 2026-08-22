@@ -6,8 +6,17 @@ const nextConfig: NextConfig = {
   basePath: process.env.NEXT_PUBLIC_BASE_PATH || undefined,
   async redirects() {
     const basePath = process.env.NEXT_PUBLIC_BASE_PATH;
+    const commonRedirects = [
+      {
+        source: "/product/ecommerce",
+        destination: "/product/catalog",
+        permanent: true,
+      }
+    ];
+
     if (basePath) {
       return [
+        ...commonRedirects,
         {
           source: "/",
           destination: `${basePath}/landing`,
@@ -22,6 +31,7 @@ const nextConfig: NextConfig = {
       ];
     }
     return [
+      ...commonRedirects,
       {
         source: "/",
         destination: "/landing",
@@ -31,10 +41,10 @@ const nextConfig: NextConfig = {
   },
   reactStrictMode: false,
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5500/api",
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NEXT_PUBLIC_API_BASE_URL: (process.env.NEXT_PUBLIC_BASE_PATH || "") + "/api",
-    NEXT_PUBLIC_STORAGE_URL: process.env.NEXT_PUBLIC_STORAGE_URL || "http://127.0.0.1:5500",
-    NEXT_PUBLIC_ADMIN_URL: process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3001",
+    NEXT_PUBLIC_STORAGE_URL: process.env.NEXT_PUBLIC_STORAGE_URL,
+    NEXT_PUBLIC_ADMIN_URL: process.env.NEXT_PUBLIC_ADMIN_URL,
   },
   images: {
     remotePatterns: [

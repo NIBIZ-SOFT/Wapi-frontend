@@ -44,17 +44,34 @@ const ChatMessageList = forwardRef<{ scrollToTop: () => void; scrollToBottom: ()
     scrollToBottom: () => scrollToBottom("smooth"),
   }));
 
-  // Handle initial scroll to bottom
+  const lastMessageIdRef = useRef<string | null>(null);
+
+  // Handle initial scroll to bottom and auto-scroll on new messages
   useEffect(() => {
     if (data?.messages && data.pagination?.page === 1) {
-      const timeout = setTimeout(() => {
-        scrollToBottom("auto");
-        // Only set initial scroll done after a short delay to ensure rendering is complete
-        setTimeout(() => setIsInitialScrollDone(true), 200);
-      }, 100);
-      return () => clearTimeout(timeout);
+      // Find the ID of the very last message in the chat
+      let latestMessageId = null;
+      if (data.messages.length > 0) {
+        const lastDateGroup = data.messages[data.messages.length - 1];
+        if (lastDateGroup.messageGroups.length > 0) {
+          const lastGroup = lastDateGroup.messageGroups[lastDateGroup.messageGroups.length - 1];
+          if (lastGroup.messages.length > 0) {
+            latestMessageId = lastGroup.messages[lastGroup.messages.length - 1].id;
+          }
+        }
+      }
+
+      // Only scroll if the latest message has changed
+      if (latestMessageId !== lastMessageIdRef.current) {
+        lastMessageIdRef.current = latestMessageId;
+        const timeout = setTimeout(() => {
+          scrollToBottom("auto");
+          setTimeout(() => setIsInitialScrollDone(true), 200);
+        }, 100);
+        return () => clearTimeout(timeout);
+      }
     }
-  }, [data?.pagination?.page]);
+  }, [data?.messages, data?.pagination?.page]);
 
   const isRequestingRef = useRef(false);
   const lastScrollTop = useRef(0);

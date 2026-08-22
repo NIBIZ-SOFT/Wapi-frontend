@@ -1,3 +1,0 @@
-{
-  "/api/webhooks/[id]/message-logs/route": "app/api/webhooks/[id]/message-logs/route.js"
-}

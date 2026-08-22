@@ -1,1 +1,0 @@
-(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,632579,t=>{"use strict";var a=t.i(843476),e=t.i(222732),i=t.i(976898);t.s(["default",0,function(){return(0,a.jsx)(i.default,{platform:"instagram",children:(0,a.jsx)(e.default,{platform:"instagram",mediaType:"post"})})}])}]);
