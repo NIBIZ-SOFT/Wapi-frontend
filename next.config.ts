@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
         source: "/product/ecommerce",
         destination: "/product/catalog",
         permanent: true,
+      },
+      {
+        source: "/product/contacts",
+        destination: "/contact_directory",
+        permanent: true,
       }
     ];
 
