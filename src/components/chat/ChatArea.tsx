@@ -3,7 +3,7 @@ import { Button } from "@/src/elements/ui/button";
 import { Textarea } from "@/src/elements/ui/textarea";
 import { useChatTheme } from "@/src/hooks/useChatTheme";
 import { cn } from "@/src/lib/utils";
-import { useGetMessagesQuery, useSendMessageMutation, useUpdateChatStatusMutation } from "@/src/redux/api/chatApi";
+import { useGetContactProfileQuery, useGetMessagesQuery, useSendMessageMutation, useUpdateChatStatusMutation } from "@/src/redux/api/chatApi";
 import { useCreateAttachmentMutation } from "@/src/redux/api/mediaApi";
 import { useAppDispatch, useAppSelector } from "@/src/redux/hooks";
 import { clearReplyToMessage, selSelectPhoneNumber, setIsMobileScreen, setLeftSidebartoggle, setProfileToggle, setReplyToMessage, updateSelectedChatStatus } from "@/src/redux/reducers/messenger/chatSlice";
@@ -14,7 +14,7 @@ import { ChatAreaProps, SendMessagePayload, SuggestReplyMessage } from "@/src/ty
 import { getInitials } from "@/src/utils";
 import { getResolvedImageUrl } from "@/src/utils/image";
 import { maskSensitiveData } from "@/src/utils/masking";
-import { BotMessageSquare, ChevronLeft, FileText, Filter, Image as ImageIcon, LayoutTemplate, Loader2, MessageSquareQuote, Mic, MoreVertical, Search, Send, Sparkles, Video, X } from "lucide-react";
+import { BotMessageSquare, ChevronLeft, FileText, Filter, Image as ImageIcon, LayoutTemplate, Loader2, MessageSquareQuote, Mic, MoreVertical, Phone, Search, Send, Sparkles, Video, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -61,6 +61,27 @@ const ChatArea: React.FC<ChatAreaProps> = ({ contactId, phoneNumberId, contactNa
   const currentContactName = contactName || selectedChat?.contact.name;
   const currentContactNumber = contactNumber || selectedChat?.contact.number;
   const currentContactAvatar = contactAvatar || selectedChat?.contact.avatar;
+
+  const { data: profileData } = useGetContactProfileQuery(
+    {
+      contact_id: currentContactId as string,
+      whatsapp_phone_number_id: currentPhoneNumberId as string,
+    },
+    { skip: !currentContactId || !currentPhoneNumberId }
+  );
+
+  const contactPhone =
+    profileData?.contact?.phone_number ||
+    profileData?.contact?.actual_phone_number ||
+    (selectedChat?.contact as any)?.phone_number ||
+    (/^\+?\d+$/.test(currentContactNumber || "") ? currentContactNumber : "");
+
+  const cleanPhone = (contactPhone || "").replace(/[^0-9+]/g, "");
+  const telHref = cleanPhone.startsWith("+")
+    ? `tel:${cleanPhone}`
+    : cleanPhone.startsWith("0")
+    ? `tel:${cleanPhone}`
+    : `tel:+${cleanPhone}`;
 
   const { app_name } = useAppSelector((state: RootState) => state.setting);
   const [messageText, setMessageText] = useState("");
@@ -620,11 +641,26 @@ const ChatArea: React.FC<ChatAreaProps> = ({ contactId, phoneNumberId, contactNa
           </div>
         )}
         <div className="flex items-center gap-3 contact-info [@media(max-width:991px)]:mr-auto rtl:[@media(max-width:991px)]:mr-0 rtl:[@media(max-width:991px)]:ml-auto" onClick={() => !isModal && onToggleProfile()}>
-          <div className="h-10 w-10 rounded-full flex items-center justify-center text-white font-bold overflow-hidden" style={{ backgroundColor: userSettingData?.theme_color == "null" ? "var(--primary)" : "var(--chat-theme-color)" }}>
+          <div className="h-10 w-10 rounded-full flex items-center justify-center text-white font-bold overflow-hidden shrink-0" style={{ backgroundColor: userSettingData?.theme_color == "null" ? "var(--primary)" : "var(--chat-theme-color)" }}>
             {currentContactAvatar ? <Image src={currentContactAvatar} alt={currentContactName || ""} width={40} height={40} className="object-cover" unoptimized /> : getInitials(app_name || "W")}
           </div>
-          <div>
-            <h3 className="font-semibold text-sm truncate  [@media(max-width:390px)]:max-w-16.5">{isAgent && user?.is_phoneno_hide ? "Customer" : maskSensitiveData(currentContactNumber, "phone", is_demo_mode)}</h3>
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="min-w-0">
+              <h3 className="font-semibold text-sm truncate [@media(max-width:390px)]:max-w-16.5">
+                {isAgent && user?.is_phoneno_hide ? "Customer" : (currentContactName || maskSensitiveData(currentContactNumber, "phone", is_demo_mode))}
+              </h3>
+            </div>
+            {cleanPhone && (!isAgent || !user?.is_phoneno_hide) && (
+              <a
+                href={telHref}
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center justify-center h-8 w-8 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/30 transition-all hover:scale-105 shrink-0"
+                title={`Call ${contactPhone}`}
+                aria-label={`Call ${contactPhone}`}
+              >
+                <Phone size={15} />
+              </a>
+            )}
           </div>
         </div>
         <div className="flex items-center sm:gap-1 gap-0 [@media(max-width:430px)]:ml-auto rtl:[@media(max-width:430px)]:ml-0 rtl:[@media(max-width:430px)]:mr-auto [@media(max-width:430px)]:flex-wrap">

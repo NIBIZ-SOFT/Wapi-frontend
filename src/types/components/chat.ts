@@ -178,6 +178,9 @@ export interface RecentChatResponseItem {
     id: string;
     number: string;
     name: string;
+    phone_number?: string;
+    whatsapp_bsuid?: string | null;
+    whatsapp_username?: string | null;
     avatar: string | null;
     labels: ContactLabel[];
     chat_status?: "open" | "resolved";

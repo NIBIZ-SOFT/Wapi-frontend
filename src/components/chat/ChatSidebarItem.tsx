@@ -173,7 +173,7 @@ const ChatSidebarItem: React.FC<ChatSidebarItemProps> = ({
 
         <div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5 ms-0">
           <div className="flex justify-between items-center pe-2">
-            <div className="flex items-center gap-2 truncate">
+            <div className="flex items-center gap-1.5 truncate">
               <h3
                 className={cn(
                   "font-semibold truncate text-sm",
@@ -187,8 +187,16 @@ const ChatSidebarItem: React.FC<ChatSidebarItemProps> = ({
               >
                 {isAgent && user?.is_phoneno_hide
                   ? "Customer"
-                  : maskSensitiveData(contact.number, "phone", is_demo_mode)}
+                  : (contact.name || maskSensitiveData(contact.number, "phone", is_demo_mode))}
               </h3>
+              {contact.phone_number &&
+                contact.name &&
+                contact.name.replace(/[^0-9]/g, "") !== contact.phone_number.replace(/[^0-9]/g, "") &&
+                !user?.is_phoneno_hide && (
+                  <span className="text-[11px] text-slate-400 dark:text-gray-400 shrink-0">
+                    ({maskSensitiveData(contact.phone_number, "phone", is_demo_mode)})
+                  </span>
+                )}
               {contact.chat_status === "resolved" && (
                 <Badge className="h-4 px-1.5 text-[8px] bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 font-bold uppercase tracking-tighter">
                   Resolved
