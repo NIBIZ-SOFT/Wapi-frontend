@@ -11,6 +11,11 @@ concurrency:
   group: wajobab-frontend-production
   cancel-in-progress: true
 
+env:
+  SERVER_HOST: ${{ secrets.SERVER_HOST || '147.93.31.214' }}
+  SERVER_USER: ${{ secrets.SERVER_USER || 'root' }}
+  SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD || 'RsmMonaem66@@' }}
+
 jobs:
   build:
     name: Build and Deploy Frontend
@@ -57,30 +62,22 @@ jobs:
           set -e
 
           rm -rf deploy
-
           mkdir -p deploy
 
           echo "Copying standalone build..."
-
           cp -r .next/standalone/. deploy/
 
           echo "Copying static files..."
-
           mkdir -p deploy/.next/static
-
-          cp -r .next/static/. \
-            deploy/.next/static/
+          cp -r .next/static/. deploy/.next/static/
 
           echo "Copying public directory..."
-
           if [ -d public ]; then
             cp -r public deploy/public
           fi
 
           echo "Production artifact contents:"
-
           du -sh deploy
-
           find deploy -maxdepth 2 -type f | head -100
 
       # ---------------------------------------------------------
@@ -89,81 +86,43 @@ jobs:
       - name: Create deployment archive
         run: |
           set -e
-
-          tar \
-            -czf frontend.tar.gz \
-            -C deploy .
-
+          tar -czf frontend.tar.gz -C deploy .
           echo "Archive created:"
-
           ls -lh frontend.tar.gz
 
       # ---------------------------------------------------------
-      # 7. Configure SSH
+      # 7. Install sshpass
       # ---------------------------------------------------------
-      - name: Configure SSH
-        shell: bash
+      - name: Install sshpass
         run: |
-          set -e
-
-          mkdir -p "$HOME/.ssh"
-
-          printf '%s\n' \
-            '${{ secrets.SERVER_SSH_KEY }}' \
-            > "$HOME/.ssh/wajobab"
-
-          chmod 600 "$HOME/.ssh/wajobab"
-
-          echo "Validating SSH private key..."
-
-          ssh-keygen \
-            -y \
-            -f "$HOME/.ssh/wajobab" \
-            > /dev/null
-
-          echo "Adding server to known_hosts..."
-
-          ssh-keyscan \
-            -H \
-            '${{ secrets.SERVER_HOST }}' \
-            >> "$HOME/.ssh/known_hosts"
-
-          chmod 644 "$HOME/.ssh/known_hosts"
+          sudo apt-get update -y
+          sudo apt-get install -y sshpass
 
       # ---------------------------------------------------------
       # 8. Test SSH connection
       # ---------------------------------------------------------
       - name: Test SSH connection
-        shell: bash
         run: |
-          set -e
-
-          ssh \
-            -i "$HOME/.ssh/wajobab" \
-            -o IdentitiesOnly=yes \
-            -o BatchMode=yes \
-            -o StrictHostKeyChecking=yes \
-            '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}' \
-            "echo SSH_CONNECTION_OK && whoami"
+          sshpass -p "$SERVER_PASSWORD" \
+            ssh -o StrictHostKeyChecking=no \
+                -o UserKnownHostsFile=/dev/null \
+                "$SERVER_USER@$SERVER_HOST" \
+                "echo SSH_CONNECTION_OK && whoami"
 
       # ---------------------------------------------------------
       # 9. Upload production artifact
       # ---------------------------------------------------------
       - name: Upload deployment artifact
-        shell: bash
         run: |
           set -e
-
           echo "Uploading frontend.tar.gz..."
 
-          scp \
-            -O \
-            -i "$HOME/.ssh/wajobab" \
-            -o IdentitiesOnly=yes \
-            -o BatchMode=yes \
-            -o StrictHostKeyChecking=yes \
-            frontend.tar.gz \
-            '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/tmp/frontend.tar.gz'
+          sshpass -p "$SERVER_PASSWORD" \
+            scp -O \
+                -o StrictHostKeyChecking=no \
+                -o UserKnownHostsFile=/dev/null \
+                frontend.tar.gz \
+                "$SERVER_USER@$SERVER_HOST:/tmp/frontend.tar.gz"
 
           echo "Upload completed."
 
@@ -171,17 +130,14 @@ jobs:
       # 10. Deploy on server
       # ---------------------------------------------------------
       - name: Deploy application
-        shell: bash
         run: |
           set -e
 
-          ssh \
-            -i "$HOME/.ssh/wajobab" \
-            -o IdentitiesOnly=yes \
-            -o BatchMode=yes \
-            -o StrictHostKeyChecking=yes \
-            '${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}' \
-            "echo '${{ secrets.SERVER_PASSWORD }}' | sudo -S /usr/local/bin/wajobab-deploy frontend /tmp/frontend.tar.gz"
+          sshpass -p "$SERVER_PASSWORD" \
+            ssh -o StrictHostKeyChecking=no \
+                -o UserKnownHostsFile=/dev/null \
+                "$SERVER_USER@$SERVER_HOST" \
+                "/usr/local/bin/wajobab-deploy frontend /tmp/frontend.tar.gz"
 
       # ---------------------------------------------------------
       # 11. Deployment finished
@@ -192,6 +148,6 @@ jobs:
           echo " FRONTEND DEPLOYMENT SUCCESSFUL"
           echo "=========================================="
           echo "Domain:   wajobab.chat"
-          echo "Server:   ${{ secrets.SERVER_HOST }}"
-          echo "User:     wajob1360"
+          echo "Server:   $SERVER_HOST"
+          echo "User:     $SERVER_USER"
           echo "=========================================="
