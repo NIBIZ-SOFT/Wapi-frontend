@@ -124,7 +124,12 @@ const TeamList = () => {
           </div>
           <div className="flex flex-col">
             <span className="font-medium text-slate-700 dark:text-white text-base">{row.name}</span>
-            <span className="text-xs text-slate-500 font-medium line-clamp-1">{row.description || t("no_description")}</span>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-xs text-slate-500 font-medium line-clamp-1">{row.description || t("no_description")}</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold bg-slate-100 dark:bg-(--page-body-bg) text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-(--card-border-color) shrink-0">
+                {row.workspaces && row.workspaces.length > 0 ? `${row.workspaces.length} Workspace${row.workspaces.length > 1 ? "s" : ""}` : "All Workspaces"}
+              </span>
+            </div>
           </div>
         </div>
       ),

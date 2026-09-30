@@ -83,6 +83,7 @@ export interface Team {
   description?: string;
   status: "active" | "inactive";
   permissions?: string[];
+  workspaces?: string[];
   created_at: string;
   updated_at: string;
 }

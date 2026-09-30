@@ -14,14 +14,16 @@ import {
   useGetTeamByIdQuery,
   useUpdateTeamMutation,
 } from "@/src/redux/api/teamApi";
+import { useGetWorkspacesQuery } from "@/src/redux/api/workspaceApi";
 import CommonHeader from "@/src/shared/CommonHeader";
 import { TeamFormProps } from "@/src/types/components";
-import { Info, Save, Settings } from "lucide-react";
+import { Building2, Globe, Info, Save, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import PermissionPicker from "./PermissionPicker";
+import { MultiSelect } from "@/src/elements/ui/multi-select";
 
 const TeamForm = ({ id, isEdit = false }: TeamFormProps) => {
   const { t } = useTranslation();
@@ -30,6 +32,8 @@ const TeamForm = ({ id, isEdit = false }: TeamFormProps) => {
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<"active" | "inactive">("active");
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
+  const [workspaceAccessType, setWorkspaceAccessType] = useState<"all" | "selected">("all");
+  const [selectedWorkspaces, setSelectedWorkspaces] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -37,6 +41,19 @@ const TeamForm = ({ id, isEdit = false }: TeamFormProps) => {
   const { data: permissionsRes, isLoading: isLoadingPermissions } =
     useGetPermissionsQuery();
   const permissions = permissionsRes?.data || [];
+
+  // Fetch workspaces
+  const { data: workspacesRes, isLoading: isLoadingWorkspaces } =
+    useGetWorkspacesQuery();
+  const workspaces = workspacesRes?.data || [];
+  const workspaceOptions = useMemo(
+    () =>
+      (workspaces || []).map((ws) => ({
+        label: ws.name,
+        value: ws._id,
+      })),
+    [workspaces]
+  );
 
   // Fetch team data if editing
   const { data: teamRes, isLoading: isLoadingTeam } = useGetTeamByIdQuery(id!, {
@@ -52,6 +69,13 @@ const TeamForm = ({ id, isEdit = false }: TeamFormProps) => {
       setDescription(teamRes.data.description || "");
       setStatus(teamRes.data.status);
       setSelectedPermissions(teamRes.data.permissions || []);
+      if (teamRes.data.workspaces && teamRes.data.workspaces.length > 0) {
+        setWorkspaceAccessType("selected");
+        setSelectedWorkspaces(teamRes.data.workspaces);
+      } else {
+        setWorkspaceAccessType("all");
+        setSelectedWorkspaces([]);
+      }
     }
   }, [isEdit, teamRes]);
 
@@ -63,6 +87,9 @@ const TeamForm = ({ id, isEdit = false }: TeamFormProps) => {
     }
     if (selectedPermissions.length === 0) {
       newErrors.permissions = "Please select at least one permission";
+    }
+    if (workspaceAccessType === "selected" && selectedWorkspaces.length === 0) {
+      newErrors.workspaces = "Please select at least one workspace or choose All Workspaces";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -80,6 +107,7 @@ const TeamForm = ({ id, isEdit = false }: TeamFormProps) => {
         description: description.trim(),
         status,
         permissions: selectedPermissions,
+        workspaces: workspaceAccessType === "selected" ? selectedWorkspaces : [],
       };
 
       if (isEdit && id) {
@@ -100,7 +128,8 @@ const TeamForm = ({ id, isEdit = false }: TeamFormProps) => {
     }
   };
 
-  const isLoading = isLoadingPermissions || (isEdit && isLoadingTeam);
+  const isLoading =
+    isLoadingPermissions || isLoadingWorkspaces || (isEdit && isLoadingTeam);
 
   return (
     <div className="flex flex-col p-4 sm:p-8 bg-(--page-body-bg) pt-0! dark:bg-(--dark-body) animate-in fade-in duration-500 ">
@@ -149,7 +178,7 @@ const TeamForm = ({ id, isEdit = false }: TeamFormProps) => {
         <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-8 pb-4 pr-1">
           {/* Left Column: Basic Info */}
           <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white dark:bg-(--card-color) sm:p-6 p-4 rounded-lg border border-slate-200 dark:border-(--card-border-color) shadow-sm space-y-6 sticky top-0">
+            <div className="bg-white dark:bg-(--card-color) sm:p-6 p-4 rounded-lg border border-slate-200 dark:border-(--card-border-color) shadow-sm space-y-6">
               <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-(--card-border-color)">
                 <div className="p-2 bg-primary/10 text-primary rounded-lg">
                   <Settings size={20} />
@@ -240,6 +269,106 @@ const TeamForm = ({ id, isEdit = false }: TeamFormProps) => {
                     for all agents assigned to this team.
                   </p>
                 </div>
+              </div>
+            </div>
+
+            {/* Workspace Access Card */}
+            <div className="bg-white dark:bg-(--card-color) sm:p-6 p-4 rounded-lg border border-slate-200 dark:border-(--card-border-color) shadow-sm space-y-5">
+              <div className="flex items-center gap-3 pb-3 border-b border-slate-100 dark:border-(--card-border-color)">
+                <div className="p-2 bg-primary/10 text-primary rounded-lg">
+                  <Building2 size={20} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white tracking-tight">
+                    Workspace Access
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Control which workspaces this team can access
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-(--page-body-bg) rounded-lg">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWorkspaceAccessType("all");
+                      if (errors.workspaces) {
+                        setErrors((prev) => {
+                          const copy = { ...prev };
+                          delete copy.workspaces;
+                          return copy;
+                        });
+                      }
+                    }}
+                    className={cn(
+                      "py-2 px-3 text-xs font-bold rounded-md transition-all flex items-center justify-center gap-1.5 cursor-pointer",
+                      workspaceAccessType === "all"
+                        ? "bg-white dark:bg-(--card-color) text-primary shadow-xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                    )}
+                  >
+                    <Globe size={14} />
+                    All Workspaces
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setWorkspaceAccessType("selected")}
+                    className={cn(
+                      "py-2 px-3 text-xs font-bold rounded-md transition-all flex items-center justify-center gap-1.5 cursor-pointer",
+                      workspaceAccessType === "selected"
+                        ? "bg-white dark:bg-(--card-color) text-primary shadow-xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                    )}
+                  >
+                    <Building2 size={14} />
+                    Selected Only
+                  </button>
+                </div>
+
+                {workspaceAccessType === "all" ? (
+                  <div className="p-3 bg-slate-50 dark:bg-(--page-body-bg) rounded-lg border border-slate-100 dark:border-(--card-border-color) text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Agents in this team will have access to <span className="font-bold text-slate-800 dark:text-white">all workspaces</span> in your organization.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-bold text-slate-700 dark:text-gray-300">
+                        Select Allowed Workspaces <span className="text-red-500">*</span>
+                      </Label>
+                      <span className="text-[11px] font-bold text-primary">
+                        {selectedWorkspaces.length} of {workspaces.length} selected
+                      </span>
+                    </div>
+
+                    <MultiSelect
+                      options={workspaceOptions}
+                      selected={selectedWorkspaces}
+                      onChange={(newSelected) => {
+                        setSelectedWorkspaces(newSelected);
+                        if (newSelected.length > 0 && errors.workspaces) {
+                          setErrors((prev) => {
+                            const copy = { ...prev };
+                            delete copy.workspaces;
+                            return copy;
+                          });
+                        }
+                      }}
+                      placeholder="Choose workspace(s)..."
+                    />
+
+                    {errors.workspaces && (
+                      <p className="text-[11px] text-red-500 ml-2 mt-1">
+                        {errors.workspaces}
+                      </p>
+                    )}
+
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500">
+                      Agents in this team will only see and access the workspaces selected above.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
