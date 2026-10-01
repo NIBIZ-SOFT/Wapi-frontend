@@ -100,6 +100,7 @@ export interface ChatMessage {
   reactions?: Reaction[];
   user_id?: string;
   whatsapp_phone_number_id?: string;
+  workspace_id?: string;
   contact_id?: string;
   platform?: string;
   provider?: string;

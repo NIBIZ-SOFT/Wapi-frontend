@@ -5,11 +5,16 @@ import { SocketProviderProps } from "@/src/types/components";
 import { useSocketHandler } from "@/src/utils/hooks/useSocketHandler";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
+import { useGetWorkspacesQuery } from "@/src/redux/api/workspaceApi";
 
 const SocketProvider = ({ children }: SocketProviderProps) => {
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated";
   const userId = session?.user?.id;
+
+  const { data: workspacesData } = useGetWorkspacesQuery(undefined, {
+    skip: !isAuthenticated,
+  });
 
   useSocketHandler();
 
@@ -19,11 +24,21 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
         socket.connect();
       }
 
+      const joinWorkspaces = () => {
+        const workspaces = workspacesData?.data || [];
+        workspaces.forEach((ws: any) => {
+          if (ws._id) {
+            socket.emit("join-workspace", String(ws._id));
+          }
+        });
+      };
+
       const handleConnect = () => {
         console.log("Socket connected");
         socket.emit(SOCKET.Emitters.Join_Room, userId);
         socket.emit(SOCKET.Emitters.Set_Online);
         socket.emit(SOCKET.Emitters.Request_Status_Update);
+        joinWorkspaces();
       };
 
       const handleConnectError = (error: Error) => {
@@ -40,6 +55,7 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
 
       if (socket.connected) {
         socket.emit(SOCKET.Emitters.Join_Room, userId);
+        joinWorkspaces();
       }
 
       return () => {

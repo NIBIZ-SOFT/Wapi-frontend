@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect, useCallback, useRef } from "react";
+import React, { useEffect, useCallback, useRef, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { isToday, isYesterday } from "date-fns";
 import { safeFormat, safeParseDate } from "../safeDate";
@@ -172,9 +172,74 @@ export const useSocketHandler = () => {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   const { selectedWorkspace } = useAppSelector((state) => state.workspace);
   const { sendNotification, startBlinking } = useNotifications();
-  const { refetch: refetchWorkspaces } = useGetWorkspacesQuery(undefined, {
+  const { data: workspacesData, refetch: refetchWorkspaces } = useGetWorkspacesQuery(undefined, {
     skip: !isAuthenticated,
   });
+
+  const isAgent = user?.role === "agent";
+  const permittedWorkspaces = workspacesData?.data || [];
+
+  const permittedWorkspaceIds = useMemo(() => {
+    const set = new Set<string>();
+    permittedWorkspaces.forEach((w: any) => {
+      if (w._id) set.add(String(w._id));
+    });
+    if (selectedWorkspace?._id) {
+      set.add(String(selectedWorkspace._id));
+    }
+    return set;
+  }, [permittedWorkspaces, selectedWorkspace?._id]);
+
+  const permittedConnectionIds = useMemo(() => {
+    const set = new Set<string>();
+    permittedWorkspaces.forEach((w: any) => {
+      if (w.waba_id) set.add(String(w.waba_id));
+      if (w.whatsapp_connection_id) set.add(String(w.whatsapp_connection_id));
+      if (w.telegram_connection_id) set.add(String(w.telegram_connection_id));
+      if (w.instagram_connection_id) set.add(String(w.instagram_connection_id));
+      if (w.facebook_connection_id) set.add(String(w.facebook_connection_id));
+    });
+    if (selectedWorkspace) {
+      if (selectedWorkspace.waba_id) set.add(String(selectedWorkspace.waba_id));
+      if (selectedWorkspace.whatsapp_connection_id) set.add(String(selectedWorkspace.whatsapp_connection_id));
+      if (selectedWorkspace.telegram_connection_id) set.add(String(selectedWorkspace.telegram_connection_id));
+      if (selectedWorkspace.instagram_connection_id) set.add(String(selectedWorkspace.instagram_connection_id));
+      if (selectedWorkspace.facebook_connection_id) set.add(String(selectedWorkspace.facebook_connection_id));
+    }
+    return set;
+  }, [permittedWorkspaces, selectedWorkspace]);
+
+  useEffect(() => {
+    if (socket.connected && permittedWorkspaceIds.size > 0) {
+      permittedWorkspaceIds.forEach((wsId) => {
+        socket.emit("join-workspace", wsId);
+      });
+    }
+  }, [permittedWorkspaceIds]);
+
+  const hasWorkspaceAccess = useCallback(
+    (data: { workspace_id?: string; whatsapp_phone_number_id?: string; user_id?: string }) => {
+      if (!data) return false;
+
+      const msgWsId = data.workspace_id ? String(data.workspace_id) : null;
+      const msgPhoneId = data.whatsapp_phone_number_id ? String(data.whatsapp_phone_number_id) : null;
+
+      if (msgWsId) {
+        return permittedWorkspaceIds.has(msgWsId);
+      }
+
+      if (msgPhoneId) {
+        return permittedConnectionIds.has(msgPhoneId);
+      }
+
+      if (isAgent) {
+        return false;
+      }
+
+      return !data.user_id || data.user_id === user?.id || data.user_id === selectedWorkspace?.user_id;
+    },
+    [isAgent, permittedWorkspaceIds, permittedConnectionIds, user?.id, selectedWorkspace?.user_id]
+  );
   const router = useRouter();
   const unreadCountRef = useRef(0);
 
@@ -347,8 +412,11 @@ export const useSocketHandler = () => {
 
   const handleStatusUpdate = useCallback(
     (updatedMessage: ChatMessage) => {
-      const isCorrectUser = !updatedMessage.user_id || updatedMessage.user_id === user?.id || updatedMessage.user_id === selectedWorkspace?.user_id;
-      if (!isCorrectUser) return;
+      if (!hasWorkspaceAccess(updatedMessage)) return;
+
+      const msgWsId = updatedMessage.workspace_id ? String(updatedMessage.workspace_id) : null;
+      const isCurrentWorkspace = !msgWsId || !selectedWorkspace?._id || msgWsId === String(selectedWorkspace._id);
+      if (!isCurrentWorkspace) return;
 
       // Invalidate Chats tag to keep sidebar in sync if an inbound message status changed to read
       if (updatedMessage.direction === "inbound" && (updatedMessage.is_seen || updatedMessage.read_status === "read")) {
@@ -425,20 +493,23 @@ export const useSocketHandler = () => {
         }
       });
     },
-    [dispatch, user, selectedWorkspace]
+    [dispatch, hasWorkspaceAccess, selectedWorkspace?._id, selectedPhoneNumberId]
   );
 
   const handleMessage = useCallback(
     (newMessage: ChatMessage) => {
-      try {
-        const isCorrectUser = !newMessage.user_id || newMessage.user_id === user?.id || newMessage.user_id === selectedWorkspace?.user_id;
-        if (!isCorrectUser) {
-          console.warn("Received message for a different user, ignoring.");
-          return;
-        }
+      if (!hasWorkspaceAccess(newMessage)) {
+        return;
+      }
 
-        updateSidebar(newMessage);
-        updateChatArea(newMessage);
+      try {
+        const msgWsId = newMessage.workspace_id ? String(newMessage.workspace_id) : null;
+        const isCurrentWorkspace = !msgWsId || !selectedWorkspace?._id || msgWsId === String(selectedWorkspace._id);
+
+        if (isCurrentWorkspace) {
+          updateSidebar(newMessage);
+          updateChatArea(newMessage);
+        }
       } catch (error) {
         console.error("Error updating chat UI from socket:", error);
       }
@@ -447,7 +518,13 @@ export const useSocketHandler = () => {
         scheduleBotReplyFetch();
 
         const isChatPage = pathname === ROUTES.WAChat;
-        const isCurrentChat = selectedChat && (String(selectedChat.contact.id) === String(newMessage.sender.id) || String(selectedChat.contact.number) === String(newMessage.sender.id) || (newMessage.contact_id && String(selectedChat.contact.id) === String(newMessage.contact_id)));
+        const msgWsId = newMessage.workspace_id ? String(newMessage.workspace_id) : null;
+        const isCurrentWorkspace = !msgWsId || !selectedWorkspace?._id || msgWsId === String(selectedWorkspace._id);
+        const isCurrentChat = isCurrentWorkspace && selectedChat && (
+          String(selectedChat.contact.id) === String(newMessage.sender.id) ||
+          String(selectedChat.contact.number) === String(newMessage.sender.id) ||
+          (newMessage.contact_id && String(selectedChat.contact.id) === String(newMessage.contact_id))
+        );
 
         if (isChatPage && isCurrentChat && document.hasFocus()) {
           markMessageAsRead({ messageId: newMessage.id });
@@ -458,9 +535,6 @@ export const useSocketHandler = () => {
         const selectedTone = notificationSettings?.notification_tone || "default";
 
         if (notificationsEnabled && (!isChatPage || !isCurrentChat || !document.hasFocus())) {
-          const isCorrectUser = !newMessage.user_id || newMessage.user_id === user?.id || newMessage.user_id === selectedWorkspace?.user_id;
-          if (!isCorrectUser) return;
-
           unreadCountRef.current += 1;
           const countStr = unreadCountRef.current > 0 ? `(${unreadCountRef.current}) ` : "";
           const msgPreview = newMessage.content || `[${newMessage.messageType}]`;
@@ -522,13 +596,12 @@ export const useSocketHandler = () => {
         }
       }
     },
-    [updateSidebar, updateChatArea, scheduleBotReplyFetch, pathname, selectedChat, sendNotification, startBlinking, dispatch, router, selectedPhoneNumberId, userSetting, user, selectedWorkspace]
+    [hasWorkspaceAccess, selectedWorkspace?._id, updateSidebar, updateChatArea, scheduleBotReplyFetch, pathname, selectedChat, markMessageAsRead, userSetting, sendNotification, startBlinking, dispatch, router]
   );
 
   const handleConnectionUpdate = useCallback(
     async (data: any) => {
-      const isCorrectUser = !data.user_id || data.user_id === user?.id || data.user_id === selectedWorkspace?.user_id;
-      if (!isCorrectUser) return;
+      if (!hasWorkspaceAccess(data)) return;
 
       dispatch(
         whatsappApi.util.updateQueryData("getBaileysQRCode", data.waba_id, (draft) => {
@@ -565,12 +638,11 @@ export const useSocketHandler = () => {
         console.error("Failed to refetch workspaces after connection update:", error);
       }
     },
-    [dispatch, refetchWorkspaces, selectedWorkspace, user]
+    [dispatch, refetchWorkspaces, selectedWorkspace, hasWorkspaceAccess]
   );
 
-  const handleSnoozeReminder = useCallback((data: { contact_id: string, contact_name?: string, contact_number?: string, user_id?: string, message: string, isDanger: boolean, snooze_count: number, timestamp?: string }) => {
-    const isCorrectUser = !data.user_id || data.user_id === user?.id || data.user_id === selectedWorkspace?.user_id;
-    if (!isCorrectUser) return;
+  const handleSnoozeReminder = useCallback((data: { contact_id: string, workspace_id?: string, contact_name?: string, contact_number?: string, user_id?: string, message: string, isDanger: boolean, snooze_count: number, timestamp?: string }) => {
+    if (!hasWorkspaceAccess(data)) return;
 
     const arrivalTime = new Date(data.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 
@@ -697,11 +769,10 @@ export const useSocketHandler = () => {
          onClick: () => handleClick("system-notification")
       } as any);
     }
-  }, [router, sendNotification, userSetting, dispatch, user, selectedWorkspace]);
+  }, [router, sendNotification, userSetting, dispatch, hasWorkspaceAccess]);
 
-  const handleAgentEscalation = useCallback((data: { contact_id: string, user_id?: string, message: string }) => {
-    const isCorrectUser = !data.user_id || data.user_id === user?.id || data.user_id === selectedWorkspace?.user_id;
-    if (!isCorrectUser) return;
+  const handleAgentEscalation = useCallback((data: { contact_id: string, workspace_id?: string, user_id?: string, message: string }) => {
+    if (!hasWorkspaceAccess(data)) return;
 
     if (data.contact_id) {
       dispatch(chatApi.util.invalidateTags([{ type: "Chats", id: data.contact_id }]));
@@ -718,7 +789,7 @@ export const useSocketHandler = () => {
         },
       });
     }
-  }, [dispatch, user, selectedWorkspace]);
+  }, [dispatch, hasWorkspaceAccess]);
 
   useEffect(() => {
     socket.on(SOCKET.Listeners.Whatsapp_Message, handleMessage);
