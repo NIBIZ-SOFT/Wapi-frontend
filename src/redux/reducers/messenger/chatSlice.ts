@@ -1,6 +1,7 @@
 import { RecentChatResponseItem } from "@/src/types/components/chat";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { getStorage } from "@/src/utils";
+import { setWorkspace, clearWorkspace } from "../workspaceSlice";
 
 const storage = getStorage();
 
@@ -97,6 +98,27 @@ const chatSlice = createSlice({
         storage.removeItem("selectedPhoneNumberId");
       }
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(setWorkspace, (state) => {
+        state.selectedChat = null;
+        state.selectedPhoneNumberId = null;
+        state.replyToMessage = null;
+        if (typeof window !== "undefined") {
+          storage.removeItem("selectedChat");
+          storage.removeItem("selectedPhoneNumberId");
+        }
+      })
+      .addCase(clearWorkspace, (state) => {
+        state.selectedChat = null;
+        state.selectedPhoneNumberId = null;
+        state.replyToMessage = null;
+        if (typeof window !== "undefined") {
+          storage.removeItem("selectedChat");
+          storage.removeItem("selectedPhoneNumberId");
+        }
+      });
   },
 });
 

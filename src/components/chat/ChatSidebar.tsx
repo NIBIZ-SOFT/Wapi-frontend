@@ -84,6 +84,16 @@ const ChatSidebar = () => {
   const userSettingData = userSetting?.data;
   const { isFeatureEnabled, getEnabledChannels } = useFeatureAccess();
 
+  const prevWorkspaceIdRef = useRef(selectedWorkspace?._id);
+  useEffect(() => {
+    if (prevWorkspaceIdRef.current && prevWorkspaceIdRef.current !== selectedWorkspace?._id) {
+      dispatch(selectChat(null));
+      dispatch(selSelectPhoneNumber(null));
+      setPage(1);
+    }
+    prevWorkspaceIdRef.current = selectedWorkspace?._id;
+  }, [selectedWorkspace?._id, dispatch]);
+
   const [selectedChannel, setSelectedChannel] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("selectedChannel") || "whatsapp";

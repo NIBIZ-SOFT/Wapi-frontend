@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useGetWorkspacesQuery } from "@/src/redux/api/workspaceApi";
 import { useAppDispatch, useAppSelector } from "@/src/redux/hooks";
 import { setWorkspace } from "@/src/redux/reducers/workspaceSlice";
+import { resetChatState } from "@/src/redux/reducers/messenger/chatSlice";
 import { Workspace, WorkspaceSwitcherModalProps } from "@/src/types/workspace";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/src/elements/ui/sheet";
 import { Building2, CheckCircle2, Loader2, Plus, Wifi, WifiOff, Edit2, Trash2 } from "lucide-react";
@@ -29,16 +30,18 @@ export default function WorkspaceSwitcherModal({ isOpen, onClose }: WorkspaceSwi
   const [deleteWorkspace, { isLoading: isDeleting }] = useDeleteWorkspaceMutation();
   const workspaces: Workspace[] = data?.data || [];
 
+  const pathname = usePathname();
   const [formOpen, setFormOpen] = useState(false);
   const [editWorkspace, setEditWorkspace] = useState<Workspace | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const handleSelect = (ws: Workspace) => {
     dispatch(setWorkspace(ws));
+    dispatch(resetChatState());
     onClose();
     if (isAgent) {
       router.push(ROUTES.WAChat);
-    } else {
+    } else if (pathname !== ROUTES.WAChat) {
       router.push(ROUTES.Dashboard);
     }
   };
