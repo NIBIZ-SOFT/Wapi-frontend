@@ -634,44 +634,43 @@ const ChatArea: React.FC<ChatAreaProps> = ({ contactId, phoneNumberId, contactNa
 
   return (
     <div className={cn("relative flex-1 min-w-0 flex flex-col h-full dark:bg-(--card-color)! text-slate-900 dark:text-white bg-white border dark:border-(--card-border-color) rounded-t-none rounded-lg border-gray-100 overflow-hidden", !isModal && "[@media(max-width:991px)]:max-w-full")}>
-      <div className="h-14 whitespace-nowrap flex-wrap [@media(min-width:768px)_and_(max-width:817px)]:h-30 [@media(max-width:430px)]:flex-wrap [@media(max-width:553px)]:h-35 [@media(max-width:430px)]:h-25 [@media(max-width:430px)]:gap-3 [@media(max-width:430px)]:p-2 [@media(max-width:452px)]:h-25 rounded-t-lg border-b border-gray-200 dark:bg-(--card-color)! dark:border-(--card-border-color) flex items-center justify-between sm:px-4 px-2 sticky top-0 z-10 cursor-pointer" style={{ backgroundColor: `${userSettingData?.theme_color == "null" ? "var(--background)" : "color-mix(in srgb, var(--chat-theme-color) , transparent 85%)"}` }}>
-        {isMobileScreen && (
-          <div onClick={handleSidebar} className="cursor-pointer">
-            <ChevronLeft size={20} />
-          </div>
-        )}
-        <div className="flex items-center gap-3 contact-info [@media(max-width:991px)]:mr-auto rtl:[@media(max-width:991px)]:mr-0 rtl:[@media(max-width:991px)]:ml-auto" onClick={() => !isModal && onToggleProfile()}>
+      <div className="h-14 min-h-[56px] px-3 sm:px-4 border-b border-gray-200 dark:bg-(--card-color)! dark:border-(--card-border-color) flex items-center justify-between gap-2 shrink-0 sticky top-0 z-10" style={{ backgroundColor: `${userSettingData?.theme_color == "null" ? "var(--background)" : "color-mix(in srgb, var(--chat-theme-color) , transparent 85%)"}` }}>
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 cursor-pointer" onClick={() => !isModal && onToggleProfile()}>
+          {isMobileScreen && (
+            <div onClick={(e) => { e.stopPropagation(); handleSidebar(); }} className="cursor-pointer mr-1 p-1 -ml-1 text-slate-600 dark:text-gray-300">
+              <ChevronLeft size={20} />
+            </div>
+          )}
           <div className="h-10 w-10 rounded-full flex items-center justify-center text-white font-bold overflow-hidden shrink-0" style={{ backgroundColor: userSettingData?.theme_color == "null" ? "var(--primary)" : "var(--chat-theme-color)" }}>
             {currentContactAvatar ? <Image src={currentContactAvatar} alt={currentContactName || ""} width={40} height={40} className="object-cover" unoptimized /> : getInitials(app_name || "W")}
           </div>
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="min-w-0">
-              <h3 className="font-semibold text-sm truncate [@media(max-width:390px)]:max-w-16.5">
-                {isAgent && user?.is_phoneno_hide ? "Customer" : (currentContactName || maskSensitiveData(currentContactNumber, "phone", is_demo_mode))}
-              </h3>
-            </div>
+          <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+            <h3 className="font-semibold text-sm truncate text-slate-900 dark:text-white">
+              {isAgent && user?.is_phoneno_hide ? "Customer" : (currentContactName || maskSensitiveData(currentContactNumber, "phone", is_demo_mode))}
+            </h3>
             {cleanPhone && (!isAgent || !user?.is_phoneno_hide) && (
               <a
                 href={telHref}
                 onClick={(e) => e.stopPropagation()}
-                className="flex items-center justify-center h-8 w-8 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/30 transition-all hover:scale-105 shrink-0"
+                className="flex items-center justify-center h-7 w-7 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/30 transition-all shrink-0"
                 title={`Call ${contactPhone}`}
                 aria-label={`Call ${contactPhone}`}
               >
-                <Phone size={15} />
+                <Phone size={14} />
               </a>
             )}
           </div>
         </div>
-        <div className="flex items-center sm:gap-1 gap-0 [@media(max-width:430px)]:ml-auto rtl:[@media(max-width:430px)]:ml-0 rtl:[@media(max-width:430px)]:mr-auto [@media(max-width:430px)]:flex-wrap">
+
+        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
           {lastInboundTime && !isBaileys && (
-            <div className="mr-2">
+            <div className="shrink-0">
               <WhatsAppTimer key={currentContactId} lastInboundTime={lastInboundTime} onExpire={handleTimerExpire} />
             </div>
           )}
           {isModal && (
-            <Button variant="ghost" size="icon" onClick={handleGoToFullChat} className="text-slate-600 hover:text-(--chat-theme-color) dark:hover:text-(--chat-theme-color) dark:text-white" title="Go to Full Chat">
-              <ChevronLeft className="rotate-180" size={20} />
+            <Button variant="ghost" size="icon" onClick={handleGoToFullChat} className="h-8 w-8 text-slate-600 hover:text-(--chat-theme-color) dark:hover:text-(--chat-theme-color) dark:text-white" title="Go to Full Chat">
+              <ChevronLeft className="rotate-180" size={18} />
             </Button>
           )}
 
@@ -680,7 +679,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ contactId, phoneNumberId, contactNa
             size="sm"
             onClick={handleToggleStatus}
             disabled={isStatusUpdating}
-            className={cn("flex items-center gap-1.5 h-9 px-3 rounded-lg transition-all font-bold text-[12px] tracking-wider", selectedChat?.contact?.chat_status === "resolved" ? "border border-primary/20 bg-primary/10 text-primary hover:text-primary/70 hover:bg-primary20 dark:bg-(--page-body-bg)! dark:text-primary" : "border border-slate-300 bg-slate-100 text-slate-600 dark:border-(--card-border-color) hover:bg-slate-200 dark:bg-(--page-body-bg) dark:text-gray-400 hover:text-primary")}
+            className={cn("flex items-center gap-1 h-8 px-2.5 rounded-lg transition-all font-bold text-[11px] sm:text-[12px] tracking-wider shrink-0", selectedChat?.contact?.chat_status === "resolved" ? "border border-primary/20 bg-primary/10 text-primary hover:text-primary/70 hover:bg-primary20 dark:bg-(--page-body-bg)! dark:text-primary" : "border border-slate-300 bg-slate-100 text-slate-600 dark:border-(--card-border-color) hover:bg-slate-200 dark:bg-(--page-body-bg) dark:text-gray-400 hover:text-primary")}
             style={
               isCustom
                 ? {
@@ -691,29 +690,31 @@ const ChatArea: React.FC<ChatAreaProps> = ({ contactId, phoneNumberId, contactNa
                 : {}
             }
           >
-            {isStatusUpdating ? <Loader2 size={14} className="animate-spin" /> : selectedChat?.contact?.chat_status === "open" ? "Resolve" : "Reopen"}
+            {isStatusUpdating ? <Loader2 size={13} className="animate-spin" /> : selectedChat?.contact?.chat_status === "open" ? "Resolve" : "Reopen"}
           </Button>
+
           <PlanFeature feature="template_bots">
             {!isAgent && (
               <Button variant="ghost" size="icon" onClick={() => {
                 const activePlatform = (typeof window !== "undefined" && localStorage.getItem("selectedChannel")) || "whatsapp";
                 router.push(`${ROUTES.MessageCampaignsAdd}?contact_id=${currentContactId}&platform=${activePlatform}&redirect_to=${isModal ? ROUTES.ContactDirectory : ROUTES.WAChat}`);
-              }} className="dark:hover:bg-(--table-hover) dark:text-white transition-colors" style={isCustom ? { color: "var(--chat-theme-color)" } : {}} title="Send Template">
-                <LayoutTemplate size={20} />
+              }} className="h-8 w-8 dark:hover:bg-(--table-hover) dark:text-white transition-colors shrink-0" style={isCustom ? { color: "var(--chat-theme-color)" } : {}} title="Send Template">
+                <LayoutTemplate size={18} />
               </Button>
             )}
           </PlanFeature>
+
           {!isModal && (
             <>
-              <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(!isSearchOpen)} className={isSearchOpen ? "text-emerald-500 bg-emerald-50 dark:bg-(--card-color) dark:hover:bg-(--table-hover) " : "text-slate-600 hover:text-primary dark:hover:text-primary dark:text-white"}>
-                <Search size={20} />
+              <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(!isSearchOpen)} className={cn("h-8 w-8 shrink-0", isSearchOpen ? "text-emerald-500 bg-emerald-50 dark:bg-(--card-color) dark:hover:bg-(--table-hover)" : "text-slate-600 hover:text-primary dark:hover:text-primary dark:text-white")}>
+                <Search size={18} />
               </Button>
-              <Button variant="ghost" size="icon" onClick={() => setIsDateFilterOpen(true)} className={`relative ${activeFilterCount > 0 ? "text-primary bg-emerald-50 dark:bg-(--dark-sidebar) dark:hover:bg-(--table-hover)" : "text-slate-600 hover:text-primary dark:hover:text-primary dark:text-white"}`}>
-                <Filter size={20} />
-                {activeFilterCount > 0 && <span className="absolute top-2 right-2 h-2 w-2 bg-primary rounded-full" />}
+              <Button variant="ghost" size="icon" onClick={() => setIsDateFilterOpen(true)} className={cn("relative h-8 w-8 shrink-0", activeFilterCount > 0 ? "text-primary bg-emerald-50 dark:bg-(--dark-sidebar) dark:hover:bg-(--table-hover)" : "text-slate-600 hover:text-primary dark:hover:text-primary dark:text-white")}>
+                <Filter size={18} />
+                {activeFilterCount > 0 && <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-primary rounded-full" />}
               </Button>
-              <Button variant="ghost" size="icon" onClick={onToggleProfile}>
-                <MoreVertical size={20} className="text-slate-600 dark:text-white hover:text-primary dark:hover:text-primary" />
+              <Button variant="ghost" size="icon" onClick={onToggleProfile} className="h-8 w-8 shrink-0 text-slate-600 dark:text-white hover:text-primary dark:hover:text-primary">
+                <MoreVertical size={18} />
               </Button>
             </>
           )}

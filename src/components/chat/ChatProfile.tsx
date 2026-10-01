@@ -309,7 +309,7 @@ const ChatProfile = () => {
 
   return (
     <div
-      className="w-full max-w-[364px] sm:min-w-[364px] sm:max-w-[364px] shrink-0 border rounded-lg border-gray-100 bg-white dark:bg-(--card-color)! dark:border-(--card-border-color) h-full flex flex-col [@media(max-width:1200px)]:absolute [@media(max-width:1200px)]:z-50 [@media(max-width:1200px)]:right-0 [@media(max-width:1200px)]:shadow-2xl [@media(max-width:1200px)]:h-[calc(100vh-114px)] [@media(max-width:639px)]:right-0 [@media(max-width:639px)]:h-[calc(100vh-107px)] [@media(max-width:375px)]:max-w-[calc(100%-20px)]"
+      className="w-full max-w-[364px] sm:min-w-[364px] sm:max-w-[364px] shrink-0 border rounded-lg border-gray-100 bg-white dark:bg-(--card-color)! dark:border-(--card-border-color) h-full flex flex-col [@media(max-width:1539px)]:absolute [@media(max-width:1539px)]:z-40 [@media(max-width:1539px)]:right-0 [@media(max-width:1539px)]:top-0 [@media(max-width:1539px)]:bottom-0 [@media(max-width:1539px)]:shadow-2xl [@media(max-width:1539px)]:h-full [@media(max-width:639px)]:right-0 [@media(max-width:375px)]:max-w-[calc(100%-20px)]"
       style={{
         backgroundColor:
           userSettingData?.bg_color && userSettingData.bg_color !== "null"

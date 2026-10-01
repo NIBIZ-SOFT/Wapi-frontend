@@ -67,11 +67,12 @@ const Chat = () => {
             forceState: true,
           })
         );
-        dispatch(setProfileToggleStatus(!currentIsMobile));
+        dispatch(setProfileToggleStatus(window.innerWidth >= 1540));
       }
     };
 
     const initialIsMobile = window.innerWidth <= 991;
+    const initialIsWide = window.innerWidth >= 1540;
     dispatch(setIsMobileScreen(initialIsMobile));
     dispatch(
       setLeftSidebartoggle({
@@ -79,7 +80,7 @@ const Chat = () => {
         forceState: true,
       })
     );
-    dispatch(setProfileToggleStatus(!initialIsMobile));
+    dispatch(setProfileToggleStatus(initialIsWide));
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
