@@ -480,14 +480,12 @@ const ChatSidebar = () => {
 
   return (
     <div
-      className="[@media(max-width:1024px)]:z-50 w-full max-w-[320px] sm:min-w-[320px] sm:max-w-[320px] border rounded-lg border-gray-100 dark:border-(--card-border-color) flex flex-col bg-white dark:bg-(--card-color)! [@media(max-width:639px)]:left-0! [@media(max-width:639px)]:h-[calc(100vh-107px)]!  [@media(max-width:991px)]:absolute [@media(max-width:991px)]:bg-white dark:[@media(max-width:991px)]:bg-(--page-body-bg) [@media(max-width:991px)]:left-0 [@media(max-width:991px)]:h-[calc(100vh-82px-16px-16px)]"
+      className="[@media(max-width:1024px)]:z-50 w-full max-w-[320px] sm:min-w-[320px] sm:max-w-[320px] shrink-0 border rounded-lg border-gray-100 dark:border-(--card-border-color) flex flex-col bg-white dark:bg-(--card-color)! [@media(max-width:639px)]:left-0! [@media(max-width:639px)]:h-[calc(100vh-107px)]!  [@media(max-width:991px)]:absolute [@media(max-width:991px)]:bg-white dark:[@media(max-width:991px)]:bg-(--page-body-bg) [@media(max-width:991px)]:left-0 [@media(max-width:991px)]:h-[calc(100vh-82px-16px-16px)]"
       style={{
         backgroundColor:
-          userSettingData?.bg_color == "null"
-            ? "var(--background)"
-            : userSettingData?.bg_color
-              ? "color-mix(in srgb, var(--chat-theme-color) , white 92%)"
-              : "var(--chat-bg-color)",
+          userSettingData?.bg_color && userSettingData.bg_color !== "null"
+            ? "color-mix(in srgb, var(--chat-theme-color) , white 92%)"
+            : undefined,
       }}
     >
       <div className="p-4 pb-0 border-b border-gray-200 dark:border-(--card-border-color) space-y-4">

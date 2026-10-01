@@ -633,7 +633,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ contactId, phoneNumberId, contactNa
   if (!currentContactId) return null;
 
   return (
-    <div className={cn("relative flex-1 flex flex-col h-full dark:bg-(--card-color)! text-slate-900 dark:text-white bg-white border dark:border-(--card-border-color) rounded-t-none rounded-lg border-gray-100 overflow-hidden", !isModal && "max-w-[calc(100vw-364px)] [@media(max-width:991px)]:max-w-full")}>
+    <div className={cn("relative flex-1 min-w-0 flex flex-col h-full dark:bg-(--card-color)! text-slate-900 dark:text-white bg-white border dark:border-(--card-border-color) rounded-t-none rounded-lg border-gray-100 overflow-hidden", !isModal && "[@media(max-width:991px)]:max-w-full")}>
       <div className="h-14 whitespace-nowrap flex-wrap [@media(min-width:768px)_and_(max-width:817px)]:h-30 [@media(max-width:430px)]:flex-wrap [@media(max-width:553px)]:h-35 [@media(max-width:430px)]:h-25 [@media(max-width:430px)]:gap-3 [@media(max-width:430px)]:p-2 [@media(max-width:452px)]:h-25 rounded-t-lg border-b border-gray-200 dark:bg-(--card-color)! dark:border-(--card-border-color) flex items-center justify-between sm:px-4 px-2 sticky top-0 z-10 cursor-pointer" style={{ backgroundColor: `${userSettingData?.theme_color == "null" ? "var(--background)" : "color-mix(in srgb, var(--chat-theme-color) , transparent 85%)"}` }}>
         {isMobileScreen && (
           <div onClick={handleSidebar} className="cursor-pointer">
@@ -724,10 +724,16 @@ const ChatArea: React.FC<ChatAreaProps> = ({ contactId, phoneNumberId, contactNa
 
       <div className="flex-1 overflow-hidden flex flex-col relative">
         <div
-          className={`absolute inset-0 z-0 pointer-events-none bg-cover bg-center bg-no-repeat transition-all dark:bg-(--card-color)! duration-500 ${userSettingData?.bg_image !== null ? "var(--chat-bg-image) opacity-60" : userSettingData?.bg_color == "null" ? "opacity-40 bg-[url('/assets/images/1.png')]!" : "opacity-40 bg-[url('/assets/images/1.png')]!"}`}
+          className="absolute inset-0 z-0 pointer-events-none bg-cover bg-center bg-no-repeat transition-all dark:bg-(--card-color)! duration-500 opacity-40"
           style={{
-            backgroundImage: userSettingData?.bg_image !== null ? "var(--chat-bg-image)" : userSettingData?.bg_color ? undefined : "bg-[url('/assets/images/1.png')]!",
-            backgroundColor: userSettingData?.bg_image == null ? "var(--chat-bg-color)" : "",
+            backgroundImage:
+              userSettingData?.bg_image
+                ? "var(--chat-bg-image)"
+                : "url('/assets/images/1.png')",
+            backgroundColor:
+              userSettingData?.bg_color && userSettingData.bg_color !== "null"
+                ? userSettingData.bg_color
+                : "#E5DDD5",
           }}
         />
         <div className="flex-1 relative z-10 flex flex-col min-h-0 pt-2">

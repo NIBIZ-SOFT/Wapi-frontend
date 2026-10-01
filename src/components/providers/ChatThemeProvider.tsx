@@ -9,14 +9,21 @@ const ChatThemeProvider: React.FC<ChatThemeProviderProps> = ({ children }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const docRoot = document.documentElement;
+    const fallbackBg = theme.bgColor || "#E5DDD5";
+    const fallbackTheme = theme.themeColor || "#128C7E";
+
+    docRoot.style.setProperty("--chat-theme-color", fallbackTheme);
+    docRoot.style.setProperty("--chat-bg-color", fallbackBg);
+
     if (containerRef.current) {
       const root = containerRef.current;
-      root.style.setProperty("--chat-theme-color", theme.themeColor);
-      root.style.setProperty("--chat-user-bubble", theme.userBubbleColor);
-      root.style.setProperty("--chat-contact-bubble", theme.contactBubbleColor);
-      root.style.setProperty("--chat-user-text", theme.userTextColor);
-      root.style.setProperty("--chat-contact-text", theme.contactTextColor);
-      root.style.setProperty("--chat-bg-color", theme.bgColor);
+      root.style.setProperty("--chat-theme-color", fallbackTheme);
+      root.style.setProperty("--chat-user-bubble", theme.userBubbleColor || "#DCF8C6");
+      root.style.setProperty("--chat-contact-bubble", theme.contactBubbleColor || "#FFFFFF");
+      root.style.setProperty("--chat-user-text", theme.userTextColor || "#000000");
+      root.style.setProperty("--chat-contact-text", theme.contactTextColor || "#000000");
+      root.style.setProperty("--chat-bg-color", fallbackBg);
       root.style.setProperty(
         "--chat-bg-image",
         theme.bgImage ? `url("${theme.bgImage}")` : "none",
@@ -26,7 +33,9 @@ const ChatThemeProvider: React.FC<ChatThemeProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty("--chat-theme-color", theme.themeColor);
+    if (theme.themeColor) {
+      root.style.setProperty("--chat-theme-color", theme.themeColor);
+    }
   }, [theme.themeColor]);
 
   return (

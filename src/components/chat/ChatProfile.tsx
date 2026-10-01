@@ -309,17 +309,15 @@ const ChatProfile = () => {
 
   return (
     <div
-      className="w-full max-w-[364px] sm:min-w-[364px] sm:max-w-[364px] border rounded-lg border-gray-100 dark:bg-(--card-color)! dark:border-(--card-border-color) h-full flex flex-col [@media(max-width:1539px)]:absolute [@media(max-width:1539px)]:z-50 [@media(max-width:1539px)]:right-0 [@media(max-width:1539px)]:h-[calc(100vh-114px)] [@media(max-width:639px)]:right-0 [@media(max-width:639px)]:h-[calc(100vh-107px)] [@media(max-width:375px)]:max-w-[calc(100%-20px)]"
+      className="w-full max-w-[364px] sm:min-w-[364px] sm:max-w-[364px] shrink-0 border rounded-lg border-gray-100 bg-white dark:bg-(--card-color)! dark:border-(--card-border-color) h-full flex flex-col [@media(max-width:1200px)]:absolute [@media(max-width:1200px)]:z-50 [@media(max-width:1200px)]:right-0 [@media(max-width:1200px)]:shadow-2xl [@media(max-width:1200px)]:h-[calc(100vh-114px)] [@media(max-width:639px)]:right-0 [@media(max-width:639px)]:h-[calc(100vh-107px)] [@media(max-width:375px)]:max-w-[calc(100%-20px)]"
       style={{
         backgroundColor:
-          userSettingData?.bg_color == "null"
-            ? "var(--background)"
-            : userSettingData?.bg_color
-              ? "color-mix(in srgb, var(--chat-theme-color) , white 92%)"
-              : "var(--chat-bg-color)",
+          userSettingData?.bg_color && userSettingData.bg_color !== "null"
+            ? "color-mix(in srgb, var(--chat-theme-color) , white 92%)"
+            : undefined,
       }}
     >
-      <div className="h-14 flex items-center justify-between gap-3 px-6 border-b border-gray-200 dark:border-(--card-border-color) shrink-0 sticky top-0 z-20">
+      <div className="h-14 flex items-center justify-between gap-3 px-6 border-b border-gray-200 dark:border-(--card-border-color) shrink-0 sticky top-0 z-20 bg-white dark:bg-(--card-color)">
         <span className="font-bold text-slate-800 dark:text-white text-lg">
           {t("contact_overview")}
         </span>
@@ -382,46 +380,44 @@ const ChatProfile = () => {
           />
 
           <PlanFeature feature="staff">
-            {!isAgent && (
-              <ProfileAssignAgent
-                agents={
-                  agents?.map((a: any) => ({
-                    id: a?._id,
-                    name: a?.name,
-                    email: a?.email,
-                  })) || []
-                }
-                selectedAgentId={
-                  profileData?.assigned_agent?._id ||
-                  profileData?.contact?.assigned_agent
-                }
-                onAssign={handleAssignAgent}
-                onUnassign={handleUnassignAgent}
-                isLoading={isAssigningAgent}
-                isUnassigning={isUnassigningAgent}
-              />
-            )}
+            <ProfileAssignAgent
+              agents={
+                agents?.map((a: any) => ({
+                  id: a?._id,
+                  name: a?.name,
+                  email: a?.email,
+                })) || []
+              }
+              selectedAgentId={
+                profileData?.assigned_agent?._id ||
+                profileData?.contact?.assigned_agent
+              }
+              onAssign={handleAssignAgent}
+              onUnassign={handleUnassignAgent}
+              isLoading={isAssigningAgent}
+              isUnassigning={isUnassigningAgent}
+            />
           </PlanFeature>
 
-          {selectedWorkspace?.waba_type !== "baileys" &&
+          {selectedWorkspace?.waba_type !== "baileys" && (
             <PlanFeature feature="whatsapp_calling">
-            {!isAgent && isWhatsApp && (
-              <ProfileAssignAICallAgent
-                agents={aiAgents}
-                selectedAgentId={
-                  profileData?.contact?.assigned_call_agent_id ||
-                  profileData?.assigned_call_agent_id ||
-                  profileData?.assigned_call_agent?._id
-                }
-                assignedAgent={profileData?.assigned_call_agent}
-                onAssign={handleAssignAIAgent}
-                onUnassign={handleRemoveAIAgent}
-                isLoading={isAssigningAIAgent}
-                isUnassigning={isRemovingAIAgent}
-              />
-            )}
-          </PlanFeature>
-            }
+              {isWhatsApp && (
+                <ProfileAssignAICallAgent
+                  agents={aiAgents}
+                  selectedAgentId={
+                    profileData?.contact?.assigned_call_agent_id ||
+                    profileData?.assigned_call_agent_id ||
+                    profileData?.assigned_call_agent?._id
+                  }
+                  assignedAgent={profileData?.assigned_call_agent}
+                  onAssign={handleAssignAIAgent}
+                  onUnassign={handleRemoveAIAgent}
+                  isLoading={isAssigningAIAgent}
+                  isUnassigning={isRemovingAIAgent}
+                />
+              )}
+            </PlanFeature>
+          )}
 
           {!isAgent && (
             <ProfileAssignChatbot
