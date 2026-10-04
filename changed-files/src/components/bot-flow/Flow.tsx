@@ -172,6 +172,7 @@ const FlowCanvas = () => {
           node.data.contactType &&
           node.data.triggerType &&
           (node.data.triggerType === "any message" ||
+            node.data.triggerType === "first message" ||
             node.data.triggerType === "order received" ||
             (node.data.keywords && node.data.keywords.length > 0))
         );
@@ -864,6 +865,7 @@ const FlowCanvas = () => {
         if (targetNode) {
           const isOrderReceived = tNode.data.triggerType === "order received";
           const isAnyMessage = tNode.data.triggerType === "any message";
+          const isFirstMessage = tNode.data.triggerType === "first message";
 
           let condition = null;
           if (isOrderReceived) {
@@ -871,6 +873,12 @@ const FlowCanvas = () => {
               field: "event_type",
               operator: "equals",
               value: "order_received",
+            };
+          } else if (isFirstMessage) {
+            condition = {
+              field: "is_first_message",
+              operator: "equals",
+              value: true,
             };
           } else if (isAnyMessage) {
             condition = {
@@ -890,7 +898,7 @@ const FlowCanvas = () => {
             "start",
             condition,
             targetNode,
-            isOrderReceived ? "Order Received" : "Greeting",
+            isOrderReceived ? "Order Received" : isFirstMessage ? "First Message" : "Greeting",
             getBackendId(tNode),
             "src",
           );
@@ -1075,6 +1083,15 @@ const FlowCanvas = () => {
         triggers.push({
           event_type: "message_received",
           conditions: {},
+        });
+      } else if (tNode.data.triggerType === "first message") {
+        triggers.push({
+          event_type: "message_received",
+          conditions: {
+            field: "is_first_message",
+            operator: "equals",
+            value: true,
+          },
         });
       } else if (tNode.data.triggerType === "order received") {
         triggers.push({

@@ -14,6 +14,7 @@ import {
   Send,
   ShoppingCart,
   Target,
+  UserCheck,
 } from "lucide-react";
 import { AssignMode, ChannelOption } from "../types/botFlow";
 
@@ -62,6 +63,11 @@ export const entryTriggerOptions = [
     value: "any message",
     label: "All Messages",
     icon: <Inbox className="h-4 w-4" />,
+  },
+  {
+    value: "first message",
+    label: "First Message",
+    icon: <UserCheck className="h-4 w-4" />,
   },
   {
     value: "order received",

@@ -46,6 +46,7 @@ export function TriggerNode({ data, id }: any) {
     if (!data.triggerType) errors.push("Selection is required.");
     if (
       data.triggerType !== "any message" &&
+      data.triggerType !== "first message" &&
       data.triggerType !== "order received" &&
       (!keywordsArray || keywordsArray.length === 0)
     ) {
@@ -140,6 +141,7 @@ export function TriggerNode({ data, id }: any) {
       </NodeField>
 
       {data.triggerType !== "any message" &&
+        data.triggerType !== "first message" &&
         data.triggerType !== "order received" && (
           <>
             <NodeField
@@ -149,6 +151,7 @@ export function TriggerNode({ data, id }: any) {
               error={
                 (touched || data.forceValidation) &&
                 data.triggerType !== "any message" &&
+                data.triggerType !== "first message" &&
                 data.triggerType !== "order received" &&
                 (!keywordsArray || keywordsArray.length === 0)
                   ? "Required"
