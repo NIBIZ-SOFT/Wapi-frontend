@@ -331,11 +331,13 @@ const FlowCanvas = () => {
                   (c: any) => c.source === n.id && c.target === chk.id,
                 ),
             );
-            if (connectedCondition?.parameters?.condition?.value) {
+            if (params.triggerType === "first message") {
+              keywords = [];
+            } else if (connectedCondition?.parameters?.condition?.value) {
               const val = connectedCondition.parameters.condition.value;
               const rawKeywords = Array.isArray(val) ? val : [val];
               keywords = rawKeywords.filter(
-                (kw: string) => !kw.includes("___"),
+                (kw: any) => typeof kw === "string" && !kw.includes("___"),
               );
             }
           }
