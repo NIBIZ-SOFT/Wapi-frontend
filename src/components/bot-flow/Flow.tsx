@@ -73,7 +73,7 @@ const FlowCanvas = () => {
   const [flowName, setFlowName] = useState("New Flow");
   const [forceValidation, setForceValidation] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { screenToFlowPosition, setViewport } = useReactFlow();
+  const { screenToFlowPosition, setViewport, fitView } = useReactFlow();
 
   const { selectedWorkspace } = useAppSelector((state) => state.workspace);
   const {
@@ -522,10 +522,12 @@ const FlowCanvas = () => {
       setNodes(restoredNodes);
       setEdges(restoredEdges);
 
-      // fitView takes a bit to work after setting nodes
-      setTimeout(() => setViewport({ x: 0, y: 0, zoom: 1 }), 100);
+      // fitView centers and fits all nodes in view
+      setTimeout(() => {
+        fitView({ padding: 0.2 });
+      }, 150);
     },
-    [setNodes, setEdges, setViewport, selectedPlatform],
+    [setNodes, setEdges, setViewport, fitView, selectedPlatform],
   );
 
   useEffect(() => {
