@@ -3,7 +3,7 @@
 
 import { ReferralData } from "@/src/types/components/chat";
 import { ExternalLink, Megaphone, Share2, Image as ImageIcon, Video } from "lucide-react";
-import React, { useState } from "react";
+import React from "react";
 import Images from "@/src/shared/Image";
 
 interface ReferralCardProps {
@@ -20,7 +20,6 @@ export const getReferralData = (message: any): ReferralData | null => {
 };
 
 const ReferralCard: React.FC<ReferralCardProps> = ({ referral }) => {
-  const [imageError, setImageError] = useState(false);
   const isAd = referral.source_type === "ad" || (!referral.source_type && referral.ctwa_clid);
   const mediaUrl = referral.image_url || referral.thumbnail_url;
   const isVideo = referral.media_type === "video" || !!referral.video_url;
@@ -47,7 +46,7 @@ const ReferralCard: React.FC<ReferralCardProps> = ({ referral }) => {
       </div>
 
       {/* Media Preview (Image or Video thumbnail) */}
-      {mediaUrl && !imageError && (
+      {mediaUrl && (
         <div className="relative w-full max-h-44 overflow-hidden bg-slate-900/10 dark:bg-black/20">
           <Images
             src={mediaUrl}
@@ -55,7 +54,6 @@ const ReferralCard: React.FC<ReferralCardProps> = ({ referral }) => {
             width={340}
             height={190}
             className="w-full h-auto max-h-44 object-cover hover:scale-105 transition-transform duration-300"
-            onError={() => setImageError(true)}
             unoptimized
           />
           {isVideo && (
