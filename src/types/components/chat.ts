@@ -73,6 +73,19 @@ export interface Reaction {
   users: ChatParticipant[];
 }
 
+export interface ReferralData {
+  source_type?: "ad" | "post" | string;
+  source_id?: string;
+  source_url?: string;
+  headline?: string;
+  body?: string;
+  media_type?: "image" | "video" | string;
+  image_url?: string;
+  video_url?: string;
+  thumbnail_url?: string;
+  ctwa_clid?: string;
+}
+
 export interface ChatMessage {
   id: string;
   wa_message_id?: string;
@@ -81,6 +94,8 @@ export interface ChatMessage {
   messageType: MessageType;
   fileUrl: string | null;
   template: TemplateData | null;
+  metadata?: Record<string, any> | null;
+  referral?: ReferralData | null;
   createdAt: string;
   can_chat: boolean;
   delivered_at: string | null;

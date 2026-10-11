@@ -14,6 +14,7 @@ import MessageInfoModal from "./MessageInfoModal";
 import MessageReactionPicker from "./MessageReactionPicker";
 import MessageTranslation from "./MessageTranslation";
 import PlanFeature from "@/src/shared/PlanFeature";
+import ReferralCard, { getReferralData } from "./ReferralCard";
 
 const StatusIcon = ({ status }: { status: string | null }) => {
   switch (status) {
@@ -49,6 +50,7 @@ const BaseMessage: React.FC<BaseMessageProps> = ({ message, children, isWindowEx
   const time = dateObj.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   const isOutgoing = message?.direction === "outbound";
   const showSenderName = !isOutgoing;
+  const referral = getReferralData(message);
 
   const handleRemoveReaction = async () => {
     if (!selectedChat || !selectedPhoneNumberId || !message.wa_message_id) return;
@@ -131,6 +133,7 @@ const BaseMessage: React.FC<BaseMessageProps> = ({ message, children, isWindowEx
                     </div>
                   </div>
                 )}
+                {referral && <ReferralCard referral={referral} />}
                 <div className={cn("w-full text-[14px] leading-normal", message.messageType === "text" ? "pe-5 pb-2" : "")}>
                   {children}
                   {translatedText && (
