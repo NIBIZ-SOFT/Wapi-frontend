@@ -43,6 +43,8 @@ export const TONES = [
   { id: "arabian_mystery_harp", name: "Arabian Mystery Harp", file: "/assets/sounds/arabian_mystery_harp.mp3" },
 ];
 
+export const NOTIFICATION_TONES = TONES;
+
 export const CHANNEL_CONFIG: Record<string, { label: string; color: string; Icon: React.ElementType }> = {
   whatsapp: { label: "WhatsApp", color: "#25D366", Icon: MessageCircle },
   baileys:  { label: "WhatsApp", color: "#25D366", Icon: MessageCircle },
