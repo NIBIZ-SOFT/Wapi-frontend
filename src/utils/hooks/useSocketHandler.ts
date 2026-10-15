@@ -18,6 +18,7 @@ import { whatsappApi } from "@/src/redux/api/whatsappApi";
 import { useGetWorkspacesQuery } from "@/src/redux/api/workspaceApi";
 import { setWorkspace } from "@/src/redux/reducers/workspaceSlice";
 import { MessageSquareWarning, AlertTriangle, X } from "lucide-react";
+import { NOTIFICATION_TONES } from "@/src/data/chat";
 
 const groupNewMessage = (existingData: DateGroupedMessages[], newMessage: ChatMessage) => {
   let foundExisting = false;
@@ -540,7 +541,8 @@ export const useSocketHandler = () => {
           const msgPreview = newMessage.content || `[${newMessage.messageType}]`;
 
           try {
-            const toneFile = selectedTone === "default" ? "/assets/sounds/default.mp3" : `/assets/sounds/${selectedTone}.mp3`;
+            const toneObj = NOTIFICATION_TONES.find((t) => t.id === selectedTone);
+            const toneFile = toneObj ? toneObj.file : (selectedTone === "default" ? "/assets/sounds/default.mp3" : `/assets/sounds/${selectedTone}.mp3`);
             const audio = new Audio(toneFile);
             audio.play().catch((e) => console.error("Error playing notification sound:", e));
           } catch {}
@@ -648,7 +650,8 @@ export const useSocketHandler = () => {
 
     try {
       const selectedTone = userSetting?.data?.notification_tone || "default";
-      const toneFile = selectedTone === "default" ? "/assets/sounds/default.mp3" : `/assets/sounds/${selectedTone}.mp3`;
+      const toneObj = NOTIFICATION_TONES.find((t) => t.id === selectedTone);
+      const toneFile = toneObj ? toneObj.file : (selectedTone === "default" ? "/assets/sounds/default.mp3" : `/assets/sounds/${selectedTone}.mp3`);
       const audio = new Audio(toneFile);
       audio.play().catch(() => {});
     } catch {}
