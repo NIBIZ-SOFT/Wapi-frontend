@@ -426,9 +426,22 @@ const SocialAutomationForm: React.FC = () => {
   }, [existingAutomationData, filteredReplyTypes]);
 
   const addKeyword = () => {
-    const t = keywordInput.trim();
-    if (t && !keywords.includes(t)) {
-      setKeywords((p) => [...p, t]);
+    const raw = keywordInput.trim();
+    if (!raw) return;
+    const items = raw
+      .split(",")
+      .map((k) => k.trim())
+      .filter((k) => k.length > 0);
+    if (items.length > 0) {
+      setKeywords((p) => {
+        const next = [...p];
+        for (const item of items) {
+          if (!next.includes(item)) {
+            next.push(item);
+          }
+        }
+        return next;
+      });
       setKeywordInput("");
     }
   };

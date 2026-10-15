@@ -58,7 +58,7 @@ export const Step1KeywordsOptions: React.FC<Step1KeywordsOptionsProps> = ({
 }) => {
   return (
     <div className="sm:p-6 p-4 space-y-6">
-      {/* Keywords Tag Input (Read-only) */}
+      {/* Keywords Tag Input */}
       <div className="space-y-2">
         <Label className="text-sm font-bold text-slate-500 ">
           Trigger Keywords
@@ -78,37 +78,60 @@ export const Step1KeywordsOptions: React.FC<Step1KeywordsOptionsProps> = ({
               className="inline-flex break-all whitespace-normal line-clamp-1 items-center px-3 py-1.5 rounded-full text-xs font-bold bg-primary text-white"
             >
               {kw}
-              {mediaType === "story" && (
-                <Button variant="unstyled"
-                  type="button"
-                  onClick={() =>
-                    setKeywords((prev) => prev.filter((k) => k !== kw))
-                  }
-                  className="ml-2 hover:bg-white/20 rounded-full p-0.5 transition-colors"
-                >
-                  <X size={12} />
-                </Button>
-              )}
+              <Button
+                variant="unstyled"
+                type="button"
+                onClick={() =>
+                  setKeywords((prev) => prev.filter((k) => k !== kw))
+                }
+                className="ml-2 hover:bg-white/20 rounded-full p-0.5 transition-colors"
+              >
+                <X size={12} />
+              </Button>
             </span>
           ))}
-          {mediaType === "story" && (
-            <div className="flex-1 min-w-[120px]">
-              <Input
-                type="text"
-                placeholder="Type a keyword and press Enter..."
-                value={keywordInput}
-                onChange={(e) => setKeywordInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="h-8 border-none bg-transparent shadow-none focus-visible:ring-0 px-1 placeholder:text-slate-400 text-sm"
-              />
+          <div className="flex-1 min-w-[140px] flex items-center gap-1">
+            <Input
+              type="text"
+              placeholder="Type a keyword and press Enter..."
+              value={keywordInput}
+              onChange={(e) => setKeywordInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="h-8 border-none bg-transparent shadow-none focus-visible:ring-0 px-1 placeholder:text-slate-400 text-sm"
+            />
+            {keywordInput.trim() && (
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={addKeyword}
+                className="h-7 px-2 text-xs font-bold text-primary hover:bg-primary/10"
+              >
+                Add
+              </Button>
+            )}
+          </div>
+        </div>
+        {suggestedKeywords &&
+          suggestedKeywords.filter((sk) => !keywords.includes(sk)).length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 pt-1">
+              <span className="text-xs font-medium text-slate-400">
+                Suggested:
+              </span>
+              {suggestedKeywords
+                .filter((sk) => !keywords.includes(sk))
+                .map((sk) => (
+                  <button
+                    key={sk}
+                    type="button"
+                    onClick={() => setKeywords((prev) => [...prev, sk])}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 hover:bg-primary/10 hover:text-primary dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"
+                  >
+                    <span className="font-bold">+</span> {sk}
+                  </button>
+                ))}
             </div>
           )}
-          {keywords.length === 0 && mediaType !== "story" && (
-            <span className="text-xs text-slate-400">
-              No keywords configured.
-            </span>
-          )}
-        </div>
       </div>
 
       {/* Matching Methods */}
