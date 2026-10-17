@@ -3,10 +3,10 @@ import { baseApi } from "./baseApi";
 
 export const chatbotApi = baseApi.enhanceEndpoints({ addTagTypes: ["Chatbot"] }).injectEndpoints({
   endpoints: (builder) => ({
-    getChatbots: builder.query<ChatbotsResponse, { waba_id: string }>({
+    getChatbots: builder.query<ChatbotsResponse, { waba_id?: string; workspace_id?: string } | void>({
       query: (params) => ({
         url: "/chatbot",
-        params,
+        params: params || {},
       }),
       providesTags: ["Chatbot"],
     }),

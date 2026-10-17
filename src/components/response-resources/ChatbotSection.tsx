@@ -19,7 +19,7 @@ const ChatbotSection: React.FC<ChatbotSectionProps> = ({ wabaId, onToggleSidebar
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [trainingChatbot, setTrainingChatbot] = useState<Chatbot | null>(null);
 
-  const { data: chatbotsData, isLoading, refetch } = useGetChatbotsQuery({ waba_id: wabaId }, { skip: !wabaId });
+  const { data: chatbotsData, isLoading, refetch } = useGetChatbotsQuery(wabaId ? { waba_id: wabaId } : {});
   const [createChatbot, { isLoading: isCreating }] = useCreateChatbotMutation();
   const [updateChatbot, { isLoading: isUpdating }] = useUpdateChatbotMutation();
   const [deleteChatbot, { isLoading: isDeleting }] = useDeleteChatbotMutation();

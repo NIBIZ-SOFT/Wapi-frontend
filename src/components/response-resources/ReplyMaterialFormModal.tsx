@@ -35,6 +35,7 @@ import {
   X
 } from "lucide-react";
 import Image from "next/image";
+import { useAppSelector } from "@/src/redux/hooks";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -130,6 +131,8 @@ const ReplyMaterialFormModal: React.FC<ReplyMaterialFormModalProps> = ({
     if (dropped) handleFileChange(dropped);
   };
 
+  const selectedWorkspace = useAppSelector((state: any) => state.workspace?.selectedWorkspace);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
@@ -167,6 +170,9 @@ const ReplyMaterialFormModal: React.FC<ReplyMaterialFormModalProps> = ({
     const fd = new FormData();
     fd.append("name", name.trim());
     fd.append("type", config.type);
+    if (selectedWorkspace?._id) {
+      fd.append("workspace_id", selectedWorkspace._id);
+    }
 
     if (config.type === "text" || config.type === "flow") {
       fd.append("content", content.trim());

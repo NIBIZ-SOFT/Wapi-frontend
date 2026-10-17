@@ -11,6 +11,7 @@ export interface ChatbotTrainingItem {
 export interface Chatbot {
   _id: string;
   waba_id: string;
+  workspace_id?: string;
   name: string;
   ai_model: any; // Populated model object or ID
   api_key: string;
@@ -26,12 +27,37 @@ export interface Chatbot {
   enable_google_meet?: boolean;
   handoff_keywords?: string[];
   handoff_message?: string;
+  category?: 'ecommerce' | 'customer_support' | 'erp_crm' | 'custom_api';
+  custom_api?: {
+    enabled: boolean;
+    api_base_url?: string;
+    headers?: Record<string, string>;
+    lookup_endpoint?: string;
+    action_endpoint?: string;
+    action_name?: string;
+    instructions?: string;
+  };
+  ecommerce?: {
+    enabled: boolean;
+    store_url?: string;
+    api_base_url?: string;
+    product_search_path?: string;
+    product_detail_path?: string;
+    order_checkout_path?: string;
+    order_track_url?: string;
+    support_hotline?: string;
+    shipping_inside_dhaka?: number;
+    shipping_outside_dhaka?: number;
+    currency?: string;
+    payment_methods?: string[];
+  };
   created_at: string;
   updated_at: string;
 }
 
 export interface ChatbotCreatePayload {
   waba_id: string;
+  workspace_id?: string;
   name: string;
   ai_model: string;
   api_key: string;
@@ -42,7 +68,30 @@ export interface ChatbotCreatePayload {
   message_limit?: number;
   enable_google_meet?: boolean;
   handoff_keywords?: string[];
-  handoff_message?: string;
+  category?: 'ecommerce' | 'customer_support' | 'erp_crm' | 'custom_api';
+  custom_api?: {
+    enabled: boolean;
+    api_base_url?: string;
+    headers?: Record<string, string>;
+    lookup_endpoint?: string;
+    action_endpoint?: string;
+    action_name?: string;
+    instructions?: string;
+  };
+  ecommerce?: {
+    enabled: boolean;
+    store_url?: string;
+    api_base_url?: string;
+    product_search_path?: string;
+    product_detail_path?: string;
+    order_checkout_path?: string;
+    order_track_url?: string;
+    support_hotline?: string;
+    shipping_inside_dhaka?: number;
+    shipping_outside_dhaka?: number;
+    currency?: string;
+    payment_methods?: string[];
+  };
 }
 
 export interface ChatbotTrainPayload {

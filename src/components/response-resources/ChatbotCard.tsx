@@ -9,6 +9,13 @@ import Can from "../shared/Can";
 const ChatbotCard: React.FC<ChatbotCardProps> = ({ chatbot, onEdit, onDelete, onTrain }) => {
   const modelName = typeof chatbot.ai_model === "object" ? chatbot.ai_model.display_name : chatbot.ai_model;
 
+  const categoryLabel = {
+    ecommerce: "🛍️ E-Commerce",
+    erp_crm: "🏢 ERP / CRM",
+    custom_api: "⚡ Custom API",
+    customer_support: "💬 Support"
+  }[chatbot.category || (chatbot.ecommerce?.enabled ? "ecommerce" : "customer_support")] || "💬 Support";
+
   return (
     <div className="group relative bg-white dark:bg-(--card-color) rounded-lg border border-slate-100 dark:border-(--card-border-color) p-5 shadow-sm hover:shadow-md transition-all flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
@@ -17,7 +24,12 @@ const ChatbotCard: React.FC<ChatbotCardProps> = ({ chatbot, onEdit, onDelete, on
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-bold text-slate-900 dark:text-white truncate uppercase tracking-tight text-sm">{chatbot.name}</h3>
-          <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">{modelName}</p>
+          <div className="flex items-center gap-1.5 mt-1">
+            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-100 dark:bg-(--dark-body) text-slate-600 dark:text-slate-300">
+              {categoryLabel}
+            </span>
+            <p className="text-[11px] text-slate-400 font-medium truncate">{modelName}</p>
+          </div>
         </div>
         <Badge variant={chatbot.status === "active" ? "outline" : "secondary"} className={chatbot.status === "active" ? "bg-emerald-50 dark:bg-primary/20 dark:border-(--card-border-color) text-emerald-600 border-emerald-100" : ""}>
           {chatbot.status === "active" ? "Active" : "Inactive"}
