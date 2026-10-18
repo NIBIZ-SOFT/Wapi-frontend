@@ -122,12 +122,29 @@ const PricingPlan: React.FC<PricingPlanProps> = ({ data }) => {
       }
     }
 
-    // Check if value is 0, "0", or false
-    if (value === 0 || value === "0" || value === false) {
+    // Check if boolean is false
+    if (typeof value === "boolean" && !value) {
       isDisabled = true;
     }
 
-    return { value, isDisabled };
+    let displayValue = value;
+    if (value === 0 || value === "0") {
+      if (plan.enabledFeatures && plan.enabledFeatures[key] === true) {
+        displayValue = "Unlimited";
+        isDisabled = false;
+      } else if (!plan.enabledFeatures || plan.enabledFeatures[key] === undefined) {
+        if (key === "workspaces" || key === "contacts" || key === "conversations") {
+          displayValue = "Unlimited";
+          isDisabled = false;
+        } else {
+          isDisabled = true;
+        }
+      } else {
+        isDisabled = true;
+      }
+    }
+
+    return { value: displayValue, isDisabled };
   };
 
   // All unique feature labels across visible plans, keeping only those that are enabled in at least one plan
@@ -145,6 +162,13 @@ const PricingPlan: React.FC<PricingPlanProps> = ({ data }) => {
       return (
         <span className="bg-rose-100 text-rose-700 text-[10px] font-black p-2 rounded-full inline-block">
           <X size={16} />
+        </span>
+      );
+    }
+    if (value === "Unlimited") {
+      return (
+        <span className="text-xs md:text-sm font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded-md border border-emerald-200 dark:border-emerald-800">
+          Unlimited
         </span>
       );
     }
