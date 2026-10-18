@@ -11,16 +11,22 @@ const StoryReplyMessage: React.FC<TextMessageProps> = ({ message, isWindowExpire
 
     return parts.map((part, index) => {
       if (part.match(urlPattern)) {
+        const trailingMatch = part.match(/([.,;:!?\)\]]+)$/);
+        const trailingPunctuation = trailingMatch ? trailingMatch[1] : "";
+        const cleanUrl = trailingPunctuation ? part.slice(0, -trailingPunctuation.length) : part;
+
         return (
-          <a
-            key={index}
-            href={part}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500! hover:underline break-all transition-colors"
-          >
-            {part}
-          </a>
+          <React.Fragment key={index}>
+            <a
+              href={cleanUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500! hover:underline break-all transition-colors"
+            >
+              {cleanUrl}
+            </a>
+            {trailingPunctuation}
+          </React.Fragment>
         );
       }
       return <React.Fragment key={index}>{part}</React.Fragment>;
