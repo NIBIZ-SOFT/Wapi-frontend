@@ -51,6 +51,7 @@ export interface Chatbot {
     shipping_outside_dhaka?: number;
     currency?: string;
     payment_methods?: string[];
+    store_rules?: string;
   };
   created_at: string;
   updated_at: string;
@@ -93,6 +94,7 @@ export interface ChatbotCreatePayload {
     shipping_outside_dhaka?: number;
     currency?: string;
     payment_methods?: string[];
+    store_rules?: string;
   };
 }
 

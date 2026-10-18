@@ -50,6 +50,7 @@ const ChatbotFormModal = ({ isOpen, onClose, onSubmit, isLoading, editItem, waba
   const [currency, setCurrency] = useState("৳");
   const [shippingInside, setShippingInside] = useState<number>(80);
   const [shippingOutside, setShippingOutside] = useState<number>(120);
+  const [storeRules, setStoreRules] = useState("");
 
   const selectedWorkspace = useAppSelector((state: any) => state.workspace?.selectedWorkspace);
   const [workspaceId, setWorkspaceId] = useState<string>("");
@@ -86,10 +87,11 @@ const ChatbotFormModal = ({ isOpen, onClose, onSubmit, isLoading, editItem, waba
       setCustomActionName(editItem?.custom_api?.action_name ?? "");
       setCustomInstructions(editItem?.custom_api?.instructions ?? "");
 
-      setEnableEcommerce(editItem?.ecommerce?.enabled ?? false);
+      setEnableEcommerce(Boolean(editItem?.ecommerce?.enabled || editItem?.category === "ecommerce"));
       setStoreUrl(editItem?.ecommerce?.store_url ?? "");
       setApiBaseUrl(editItem?.ecommerce?.api_base_url ?? "");
       setImageBaseUrl(editItem?.ecommerce?.image_base_url ?? "");
+      setStoreRules(editItem?.ecommerce?.store_rules ?? "");
       setProductSearchPath(editItem?.ecommerce?.product_search_path ?? "");
       setProductDetailPath(editItem?.ecommerce?.product_detail_path ?? "");
       setOrderCheckoutPath(editItem?.ecommerce?.order_checkout_path ?? "");
@@ -133,6 +135,7 @@ const ChatbotFormModal = ({ isOpen, onClose, onSubmit, isLoading, editItem, waba
         store_url: storeUrl.trim(),
         api_base_url: apiBaseUrl.trim(),
         image_base_url: imageBaseUrl.trim(),
+        store_rules: storeRules.trim(),
         product_search_path: productSearchPath.trim(),
         product_detail_path: productDetailPath.trim(),
         order_checkout_path: orderCheckoutPath.trim(),
@@ -473,6 +476,18 @@ const ChatbotFormModal = ({ isOpen, onClose, onSubmit, isLoading, editItem, waba
                           className="h-9 text-xs rounded-md bg-white dark:bg-(--card-color)"
                         />
                       </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label className="text-xs font-medium text-slate-500">Custom Store Rules & Prompt Instructions (Optional)</Label>
+                      <Textarea
+                        value={storeRules}
+                        onChange={(e) => setStoreRules(e.target.value)}
+                        placeholder="e.g. Always address customers respectfully as 'Sir'. Free delivery on orders over ৳2000. Return policy is 7 days. Do not offer extra discounts."
+                        disabled={isLoading}
+                        rows={3}
+                        className="text-xs rounded-md bg-white dark:bg-(--card-color)"
+                      />
                     </div>
                   </div>
                 )}
