@@ -41,6 +41,7 @@ export interface Chatbot {
     enabled: boolean;
     store_url?: string;
     api_base_url?: string;
+    image_base_url?: string;
     product_search_path?: string;
     product_detail_path?: string;
     order_checkout_path?: string;
@@ -82,6 +83,7 @@ export interface ChatbotCreatePayload {
     enabled: boolean;
     store_url?: string;
     api_base_url?: string;
+    image_base_url?: string;
     product_search_path?: string;
     product_detail_path?: string;
     order_checkout_path?: string;

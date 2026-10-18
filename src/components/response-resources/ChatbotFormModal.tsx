@@ -41,6 +41,7 @@ const ChatbotFormModal = ({ isOpen, onClose, onSubmit, isLoading, editItem, waba
   const [enableEcommerce, setEnableEcommerce] = useState<boolean>(false);
   const [storeUrl, setStoreUrl] = useState("");
   const [apiBaseUrl, setApiBaseUrl] = useState("");
+  const [imageBaseUrl, setImageBaseUrl] = useState("");
   const [orderTrackUrl, setOrderTrackUrl] = useState("");
   const [supportHotline, setSupportHotline] = useState("");
   const [productSearchPath, setProductSearchPath] = useState("");
@@ -88,6 +89,7 @@ const ChatbotFormModal = ({ isOpen, onClose, onSubmit, isLoading, editItem, waba
       setEnableEcommerce(editItem?.ecommerce?.enabled ?? false);
       setStoreUrl(editItem?.ecommerce?.store_url ?? "");
       setApiBaseUrl(editItem?.ecommerce?.api_base_url ?? "");
+      setImageBaseUrl(editItem?.ecommerce?.image_base_url ?? "");
       setProductSearchPath(editItem?.ecommerce?.product_search_path ?? "");
       setProductDetailPath(editItem?.ecommerce?.product_detail_path ?? "");
       setOrderCheckoutPath(editItem?.ecommerce?.order_checkout_path ?? "");
@@ -130,6 +132,7 @@ const ChatbotFormModal = ({ isOpen, onClose, onSubmit, isLoading, editItem, waba
         enabled: category === "ecommerce" || enableEcommerce,
         store_url: storeUrl.trim(),
         api_base_url: apiBaseUrl.trim(),
+        image_base_url: imageBaseUrl.trim(),
         product_search_path: productSearchPath.trim(),
         product_detail_path: productDetailPath.trim(),
         order_checkout_path: orderCheckoutPath.trim(),
@@ -350,7 +353,7 @@ const ChatbotFormModal = ({ isOpen, onClose, onSubmit, isLoading, editItem, waba
 
                 {enableEcommerce && (
                   <div className="mt-3 space-y-3 bg-slate-50 dark:bg-(--dark-body) p-3.5 rounded-xl border border-slate-200 dark:border-(--card-border-color)">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="space-y-1">
                         <Label className="text-xs font-medium text-slate-500">Store Website URL</Label>
                         <Input
@@ -367,6 +370,16 @@ const ChatbotFormModal = ({ isOpen, onClose, onSubmit, isLoading, editItem, waba
                           value={apiBaseUrl}
                           onChange={(e) => setApiBaseUrl(e.target.value)}
                           placeholder="https://backend.example.com"
+                          disabled={isLoading}
+                          className="h-9 text-xs rounded-md bg-white dark:bg-(--card-color)"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs font-medium text-slate-500">Product Image Base URL (Optional)</Label>
+                        <Input
+                          value={imageBaseUrl}
+                          onChange={(e) => setImageBaseUrl(e.target.value)}
+                          placeholder="e.g. https://backend.example.com or CDN"
                           disabled={isLoading}
                           className="h-9 text-xs rounded-md bg-white dark:bg-(--card-color)"
                         />
