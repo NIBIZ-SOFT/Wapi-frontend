@@ -87,6 +87,7 @@ const QRCodeConnection = ({ isDisabled }: QRCodeConnectionProps) => {
           name: nameToUse,
           provider: "baileys",
           workspace_id: selectedWorkspace?._id,
+          sync_chat: true,
         }).unwrap();
 
         if (response.success && response.data?.waba_id) {
