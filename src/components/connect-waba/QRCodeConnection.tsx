@@ -36,6 +36,56 @@ const QRCodeConnection = ({ isDisabled }: QRCodeConnectionProps) => {
   const currentWabaId = latestWorkspace?.waba_id || selectedWorkspace?.waba_id;
   const isConnected = isBaileys ? !!currentWabaId && connectionStatus === "connected" : !!currentWabaId;
 
+  const pollForQR = useCallback(
+    async (targetId: string) => {
+      setStatus("generating");
+      let attempts = 0;
+      const maxAttempts = 30; // 60 seconds
+
+      const checkQR = async (): Promise<boolean> => {
+        try {
+          const res = await getQRCode(targetId).unwrap();
+          if (res?.success && res.data) {
+            if (res.data.qr_code) {
+              setQrCode(res.data.qr_code);
+              setStatus("scanning");
+              refetchWorkspaces();
+              return true;
+            }
+            if (res.data.status === "connected") {
+              setStatus("connected");
+              refetchWorkspaces();
+              return true;
+            }
+            if (res.data.status === "qr_timeout" || res.data.status === "expired") {
+              setStatus("expired");
+              return true;
+            }
+          }
+        } catch (err: any) {
+          console.error("Error fetching QR code:", err);
+        }
+        return false;
+      };
+
+      const immediateSuccess = await checkQR();
+      if (immediateSuccess) return;
+
+      const interval = setInterval(async () => {
+        attempts++;
+        const done = await checkQR();
+        if (done || attempts >= maxAttempts) {
+          clearInterval(interval);
+          if (!done && attempts >= maxAttempts) {
+            setStatus("failed");
+            toast.error(t("qr_fetch_failed_after_connect"));
+          }
+        }
+      }, 2000);
+    },
+    [getQRCode, refetchWorkspaces, t]
+  );
+
   const handleGenerateQR = useCallback(async () => {
     try {
       setStatus("generating");
@@ -44,33 +94,8 @@ const QRCodeConnection = ({ isDisabled }: QRCodeConnectionProps) => {
       const targetWabaId = wabaId || latestWorkspace?.waba_id || selectedWorkspace?.waba_id;
 
       if (isBaileys && targetWabaId) {
-        try {
-          const res = await getQRCode(targetWabaId).unwrap();
-          if (res?.success) {
-            if (res?.data?.status === 'generating' || (!res?.data?.qr_code && res?.data?.status !== 'connected')) {
-              const poll = setInterval(async () => {
-                try {
-                  const pollRes = await getQRCode(targetWabaId).unwrap();
-                  if (pollRes?.data?.qr_code || pollRes?.data?.status === 'connected') {
-                    clearInterval(poll);
-                    refetchWorkspaces();
-                  }
-                } catch {
-                  clearInterval(poll);
-                }
-              }, 2000);
-              setTimeout(() => clearInterval(poll), 60000);
-              return;
-            }
-            refetchWorkspaces();
-            return;
-          }
-        } catch (error: any) {
-          console.error("Direct QR fetch failed:", error);
-          setStatus("failed");
-          toast.error(error?.data?.message || error?.message || t("failed_fetch_qr"));
-          return;
-        }
+        await pollForQR(targetWabaId);
+        return;
       }
 
       if (!isBaileys || !targetWabaId) {
@@ -93,14 +118,7 @@ const QRCodeConnection = ({ isDisabled }: QRCodeConnectionProps) => {
         if (response.success && response.data?.waba_id) {
           const newWabaId = response.data.waba_id;
           setWabaId(newWabaId);
-
-          const qrRes = await getQRCode(newWabaId).unwrap();
-          if (qrRes?.success && qrRes.data?.qr_code) {
-            refetchWorkspaces();
-          } else {
-            setStatus("failed");
-            toast.error(t("qr_fetch_failed_after_connect"));
-          }
+          await pollForQR(newWabaId);
         } else {
           throw new Error(response.message || t("failed_get_connection_id"));
         }
@@ -109,26 +127,26 @@ const QRCodeConnection = ({ isDisabled }: QRCodeConnectionProps) => {
       setStatus("failed");
       toast.error(error?.data?.message || error?.message || t("failed_init_connection"));
     }
-  }, [isBaileys, wabaId, latestWorkspace, selectedWorkspace, instanceName, getQRCode, refetchWorkspaces, connectWhatsApp, t]);
+  }, [isBaileys, wabaId, latestWorkspace, selectedWorkspace, instanceName, pollForQR, connectWhatsApp, t]);
 
   useEffect(() => {
-    if (selectedWorkspace && isBaileys && selectedWorkspace.waba_id && !wabaId) {
-      setWabaId(selectedWorkspace.waba_id);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedWorkspace, isBaileys]);
+    const targetId = selectedWorkspace?.waba_id || null;
+    setWabaId(targetId);
+    setQrCode(null);
+    setStatus("idle");
+  }, [selectedWorkspace?._id, selectedWorkspace?.waba_id]);
 
   useEffect(() => {
-    if (qrData?.success) {
-      if (qrData.data?.qr_code) {
+    if (qrData?.success && qrData.data) {
+      if (qrData.data.qr_code) {
         setQrCode(qrData.data.qr_code);
         setStatus("scanning");
       }
-      if (qrData.data?.status === "connected") {
+      if (qrData.data.status === "connected") {
         setStatus("connected");
-      } else if (qrData.data?.status === "qr_timeout") {
+      } else if (qrData.data.status === "qr_timeout" || qrData.data.status === "expired") {
         setStatus("expired");
-      } else if (qrData.data?.status === "disconnected" || qrData.data?.status === "generating") {
+      } else if (qrData.data.status === "disconnected") {
         if (!qrCode && status !== "generating") setStatus("failed");
       }
     }
@@ -145,13 +163,9 @@ const QRCodeConnection = ({ isDisabled }: QRCodeConnectionProps) => {
   }, [connectionStatus, status, wabaId, latestWorkspace?.waba_id, isBaileys, attemptedWabaIds, handleGenerateQR]);
 
   const handleRefreshQR = async () => {
-    if (wabaId) {
-      try {
-        await getQRCode(wabaId).unwrap();
-        refetchWorkspaces();
-      } catch (error: any) {
-        toast.error(error?.error || "Failed to refresh QR code");
-      }
+    const targetWabaId = wabaId || latestWorkspace?.waba_id || selectedWorkspace?.waba_id;
+    if (targetWabaId) {
+      await pollForQR(targetWabaId);
     }
   };
 
