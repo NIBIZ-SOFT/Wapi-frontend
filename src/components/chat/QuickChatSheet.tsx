@@ -189,12 +189,13 @@ const QuickChatSheet: React.FC<QuickChatSheetProps> = ({
                             className="text-xs"
                           >
                             {maskSensitiveData(
-                              phone.verified_name &&
-                                phone.verified_name !== "N/A" &&
-                                phone.verified_name.trim() !== ""
-                                ? phone.verified_name
-                                : phone.display_phone_number ||
-                                    phone.phone_number,
+                              (() => {
+                                const rawNumber = phone.display_phone_number || phone.phone_number || "";
+                                const hasVerified = phone.verified_name && phone.verified_name !== "N/A" && phone.verified_name.trim() !== "";
+                                if (hasVerified && rawNumber) return `${phone.verified_name} (${rawNumber})`;
+                                if (hasVerified) return phone.verified_name;
+                                return rawNumber;
+                              })(),
                               "phone",
                               is_demo_mode,
                             )}

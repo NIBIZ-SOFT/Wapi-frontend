@@ -229,9 +229,14 @@ const ChatSidebar = () => {
   const dropdownOptions = useMemo(() => {
     if (selectedChannel === "whatsapp") {
       return phoneNumbers.map((p: any) => {
-        const nameToDisplay = (p.verified_name && p.verified_name !== "N/A" && p.verified_name.trim() !== "")
-          ? p.verified_name
-          : (p.display_phone_number || p.phone_number || "");
+        const rawNumber = p.display_phone_number || p.phone_number || "";
+        const hasVerifiedName = p.verified_name && p.verified_name !== "N/A" && p.verified_name.trim() !== "";
+        let nameToDisplay = rawNumber;
+        if (hasVerifiedName && rawNumber) {
+          nameToDisplay = `${p.verified_name} (${rawNumber})`;
+        } else if (hasVerifiedName) {
+          nameToDisplay = p.verified_name;
+        }
         return {
           id: String(p.id),
           display:
