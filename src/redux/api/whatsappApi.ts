@@ -95,6 +95,17 @@ export const whatsappApi = baseApi.enhanceEndpoints({ addTagTypes: ["Whatsapp", 
       },
       providesTags: ["Whatsapp"],
     }),
+    testConnection: builder.mutation<
+      { success: boolean; message: string; data?: any },
+      { phone_number_id?: string; recipient_number: string; message?: string }
+    >({
+      query: (body) => ({
+        url: "/whatsapp/test-connection",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Whatsapp", "Chats" as any],
+    }),
   }),
 });
 
@@ -110,5 +121,6 @@ export const {
   useLazyGetBaileysQRCodeQuery,
   useDisconnectWhatsAppMutation,
   useSetPrimaryPhoneNumberMutation,
-  useGetMessageLogsQuery
+  useGetMessageLogsQuery,
+  useTestConnectionMutation
 } = whatsappApi;

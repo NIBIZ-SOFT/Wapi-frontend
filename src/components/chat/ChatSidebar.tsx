@@ -46,9 +46,11 @@ import {
   ListChecks,
   Loader2,
   Search,
+  SquarePen,
   Trash2,
   X
 } from "lucide-react";
+import StartNewChatModal from "./StartNewChatModal";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -75,6 +77,7 @@ const ChatSidebar = () => {
   const debouncedSearch = useDebounce(searchQuery, 500);
   const [activeTab, setActiveTab] = useState("all");
   const [page, setPage] = useState(1);
+  const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { permission } = useNotifications();
@@ -333,6 +336,7 @@ const ChatSidebar = () => {
     data: chatsData,
     isLoading,
     isFetching,
+    refetch: refetchChats,
   } = useGetRecentChatsQuery(
     {
       page,
@@ -564,6 +568,22 @@ const ChatSidebar = () => {
               </div>
             ) : (
               <>                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={() => setIsNewChatModalOpen(true)}
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 transition-all"
+                      title="Start New Chat"
+                    >
+                      <SquarePen size={18} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-emerald-600 text-white border-emerald-600">
+                    <p>Start New Chat</p>
+                  </TooltipContent>
+                </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -876,6 +896,14 @@ const ChatSidebar = () => {
         subtitle={`You are not connected to ${channelToConnect?.label} yet. Would you like to connect a new ${channelToConnect?.label} channel?`}
         confirmText="Connect Now"
         variant="primary"
+      />
+      <StartNewChatModal
+        isOpen={isNewChatModalOpen}
+        onClose={() => setIsNewChatModalOpen(false)}
+        selectedPhoneNumberId={selectedPhoneNumberId}
+        onSuccess={() => {
+          refetchChats();
+        }}
       />
     </div>
   );

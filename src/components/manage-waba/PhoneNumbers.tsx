@@ -20,8 +20,9 @@ import { PhoneNumbersProps, WabaPhoneNumber } from "@/src/types/whatsapp";
 import { ROUTES } from "@/src/constants";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/src/elements/ui/button";
-import { Star, UserStar } from "lucide-react";
+import { Send, Star, UserStar } from "lucide-react";
 import Can from "../shared/Can";
+import TestConnectionModal from "./TestConnectionModal";
 
 const PhoneNumbers = ({ wabaId }: PhoneNumbersProps) => {
   const { t } = useTranslation();
@@ -36,6 +37,7 @@ const PhoneNumbers = ({ wabaId }: PhoneNumbersProps) => {
   const [primaryTarget, setPrimaryTarget] = useState<WabaPhoneNumber | null>(
     null,
   );
+  const [testTarget, setTestTarget] = useState<WabaPhoneNumber | null>(null);
   const dispatch = useAppDispatch();
   const [triggerGetWorkspaces] = useLazyGetWorkspacesQuery();
   const [disconnectWaba, { isLoading: isDisconnecting }] =
@@ -206,6 +208,15 @@ const PhoneNumbers = ({ wabaId }: PhoneNumbersProps) => {
       header: "Actions",
       cell: (row) => (
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-10 h-10 border-none text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg transition-all"
+            onClick={() => setTestTarget(row)}
+            title="Send Test Message"
+          >
+            <Send className="size-4.5 transition-transform duration-200 active:scale-95" />
+          </Button>
           {row.is_primary ? (
             <Button
               variant="ghost"
@@ -308,6 +319,12 @@ const PhoneNumbers = ({ wabaId }: PhoneNumbersProps) => {
         subtitle={`Are you sure you want to set ${primaryTarget?.display_phone_number || ""} as the primary phone number? This will make it the default sender for all WhatsApp communication.`}
         confirmText="Set Primary"
         variant="primary"
+      />
+
+      <TestConnectionModal
+        isOpen={!!testTarget}
+        onClose={() => setTestTarget(null)}
+        phone={testTarget}
       />
     </div>
   );
