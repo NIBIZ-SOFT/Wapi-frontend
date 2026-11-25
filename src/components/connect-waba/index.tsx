@@ -20,6 +20,7 @@ import WebhookConfiguration from "./WebhookConfiguration";
 import { cn } from "@/src/lib/utils";
 import { ROUTES } from "@/src/constants";
 import InfoModal from "../common/InfoModal";
+import { toast } from "sonner";
 
 const ConnectWABA = () => {
   const { t } = useTranslation();
@@ -81,6 +82,7 @@ const ConnectWABA = () => {
         }).unwrap();
 
         if (response.success) {
+          toast.success(t("waba_connected_successfully") || "WhatsApp Business Account connected successfully!");
           const { data: updatedWorkspaces } = await refetchWorkspaces();
           if (updatedWorkspaces?.data) {
             const currentWs = updatedWorkspaces.data.find(
@@ -91,11 +93,20 @@ const ConnectWABA = () => {
             }
           }
         }
+      } catch (err: any) {
+        console.error("Embedded signup connection error:", err);
+        toast.error(
+          err?.data?.error ||
+          err?.data?.message ||
+          err?.message ||
+          t("failed_to_connect_waba") ||
+          "Failed to connect WhatsApp account"
+        );
       } finally {
         setIsLoading(false);
       }
     },
-    [connection, selectedWorkspace, refetchWorkspaces, dispatch],
+    [connection, selectedWorkspace, refetchWorkspaces, dispatch, t],
   );
 
   const { startSignup, fbReady } = useEmbeddedSignup(handleFinish);
